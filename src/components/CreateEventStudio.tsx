@@ -2,6 +2,7 @@
 
 import React, { useState, useRef, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import {
   Upload,
   Sparkles,
@@ -1304,6 +1305,22 @@ export default function CreateEventStudio({ onComplete }: CreateEventStudioProps
                 placeholder="organizer@campus.edu or WhatsApp number"
                 className="w-full bg-kalvium-surface-alt dark:bg-kalvium-dark-surface-alt border border-kalvium-border dark:border-kalvium-dark-border rounded-xl px-4 py-2.5 text-sm text-kalvium-text dark:text-kalvium-dark-text focus:outline-none focus:border-kalvium-coral"
               />
+            </div>
+
+            {/* Compliance & Policy Notice */}
+            <div className="p-3.5 rounded-2xl bg-kalvium-surface-alt dark:bg-kalvium-dark-surface-alt border border-kalvium-border dark:border-kalvium-dark-border flex items-start gap-3 text-xs text-kalvium-muted dark:text-kalvium-dark-muted">
+              <ShieldCheck className="w-4 h-4 text-kalvium-success shrink-0 mt-0.5" />
+              <span className="leading-relaxed">
+                By submitting, you certify that this event complies with the{" "}
+                <Link
+                  href="/guidelines"
+                  target="_blank"
+                  className="font-semibold text-kalvium-text dark:text-kalvium-dark-text underline hover:text-kalvium-coral transition"
+                >
+                  Campus Event Guidelines
+                </Link>{" "}
+                and that extracted promotional details match original artwork.
+              </span>
             </div>
 
             {/* Submit Button */}

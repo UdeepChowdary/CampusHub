@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Sparkles, ArrowRight, User, Mail, Lock, ShieldAlert, GraduationCap, PenTool, Eye, EyeOff } from "lucide-react";
 import { useAuth, getDashboardRoute } from "@/context/AuthContext";
-import { isSafeRedirectUrl } from "@/lib/auth-shared";
+import { isSafeRedirectUrl } from "@/lib/safe-redirect";
 
 function RegisterContent() {
   const { register, user, loading: authLoading } = useAuth();
@@ -19,6 +19,7 @@ function RegisterContent() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
+  const [agreedToTerms, setAgreedToTerms] = useState(false);
   const role = "STUDENT";
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -39,6 +40,10 @@ function RegisterContent() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!agreedToTerms) {
+      setError("Please agree to the Terms & Conditions and acknowledge our Privacy Policy to proceed.");
+      return;
+    }
     setLoading(true);
     setError(null);
     const res = await register(name, email, password, role);
@@ -184,6 +189,47 @@ function RegisterContent() {
               {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
             </button>
           </div>
+        </div>
+
+        {/* Terms & Privacy Acceptance Checkbox */}
+        <div className="flex items-start gap-2.5 pt-1 pb-1">
+          <input
+            id="terms-checkbox"
+            type="checkbox"
+            checked={agreedToTerms}
+            onChange={(e) => setAgreedToTerms(e.target.checked)}
+            className="mt-0.5 h-4 w-4 rounded border-kalvium-border dark:border-kalvium-dark-border text-kalvium-coral focus:ring-kalvium-coral cursor-pointer"
+          />
+          <label
+            htmlFor="terms-checkbox"
+            className="text-[11px] leading-relaxed text-kalvium-muted dark:text-kalvium-dark-muted cursor-pointer select-none"
+          >
+            I agree to the{" "}
+            <Link
+              href="/terms"
+              target="_blank"
+              className="font-semibold text-kalvium-text dark:text-kalvium-dark-text underline hover:text-kalvium-coral transition"
+            >
+              Terms &amp; Conditions
+            </Link>
+            , acknowledge the{" "}
+            <Link
+              href="/privacy"
+              target="_blank"
+              className="font-semibold text-kalvium-text dark:text-kalvium-dark-text underline hover:text-kalvium-coral transition"
+            >
+              Privacy Policy
+            </Link>
+            , and agree to adhere to the{" "}
+            <Link
+              href="/guidelines"
+              target="_blank"
+              className="font-semibold text-kalvium-text dark:text-kalvium-dark-text underline hover:text-kalvium-coral transition"
+            >
+              Campus Event Guidelines
+            </Link>
+            .
+          </label>
         </div>
 
         <button

@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Sparkles, ArrowRight, ShieldCheck, GraduationCap, PenTool, User, Lock, Mail, Eye, EyeOff } from "lucide-react";
 import { useAuth, getDashboardRoute } from "@/context/AuthContext";
-import { isSafeRedirectUrl } from "@/lib/auth-shared";
+import { isSafeRedirectUrl } from "@/lib/safe-redirect";
 import CampusVerifiedBadge from "@/components/CampusVerifiedBadge";
 
 function LoginContent() {

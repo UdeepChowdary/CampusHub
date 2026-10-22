@@ -295,7 +295,11 @@ export default function EventDetailDrawer({
                 Human Certified by Campus Leadership
               </span>
               <p className="text-xs text-kalvium-muted dark:text-kalvium-dark-muted leading-relaxed">
-                Extracted with AI and authenticated against original poster artwork by the campus manager.
+                Extracted with AI and authenticated against original poster artwork by campus administration under the{" "}
+                <Link href="/guidelines" className="text-kalvium-coral font-semibold hover:underline">
+                  Campus Verification Standard
+                </Link>
+                .
               </p>
             </div>
 
