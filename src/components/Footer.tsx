@@ -55,7 +55,7 @@ export default function Footer() {
               </span>
               <span className="font-semibold text-kalvium-text dark:text-kalvium-dark-text">Campus Systems Live</span>
               <span className="text-kalvium-muted">•</span>
-              <span className="text-kalvium-success font-medium">Spring 2026</span>
+              <span className="text-kalvium-success font-medium">Winter 2026</span>
             </div>
 
             <div className="pl-0 sm:pl-6 sm:border-l border-kalvium-border dark:border-kalvium-dark-border">

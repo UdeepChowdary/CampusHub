@@ -11,50 +11,17 @@ import {
   Copy,
   Check,
   Send,
-  MessageSquare,
   HelpCircle,
   FileText,
   ShieldCheck,
   Sparkles,
-  Bug,
-  KeyRound,
-  CalendarPlus,
   Loader2,
   CheckCircle2,
   AlertCircle,
   ArrowRight,
 } from "lucide-react";
 
-const QUICK_INQUIRIES = [
-  {
-    title: "Account & Login Issue",
-    icon: KeyRound,
-    category: "Account & Login Issue",
-    subject: "Login or Permission Issue on CampusHub",
-    body: "Hi CampusHub Team,\n\nI am experiencing an issue accessing my account.\n\nDescription of Issue:\nSteps I tried:\nError Message (if any):",
-  },
-  {
-    title: "Request Event Hosting Access",
-    icon: CalendarPlus,
-    category: "Request Event Hosting Access",
-    subject: "Requesting Event Hosting Privileges",
-    body: "Hi CampusHub Team,\n\nI would like to request organizer hosting privileges on CampusHub.\n\nClub / Society Name:\nProposed Event Title:\nBrief Event Summary:\nTarget Date & Venue:",
-  },
-  {
-    title: "Report a Bug or Defect",
-    icon: Bug,
-    category: "Report a Bug / Defect",
-    subject: "CampusHub Bug Report",
-    body: "Hi CampusHub Team,\n\nI discovered a bug on the platform.\n\nPage / URL:\nSteps to Reproduce:\nExpected Result:\nActual Result:\nDevice & Browser:",
-  },
-  {
-    title: "Squad 83 General Question",
-    icon: MessageSquare,
-    category: "General Inquiry",
-    subject: "General Question regarding CampusHub",
-    body: "Hi Udeep & Mageshwaran,\n\nI have a question about CampusHub:\n\n",
-  },
-];
+
 
 export default function ContactStaffPage() {
   const [copiedEmail, setCopiedEmail] = useState<string | null>(null);
@@ -80,20 +47,7 @@ export default function ContactStaffPage() {
     }
   };
 
-  const handleSelectQuickInquiry = (inquiry: typeof QUICK_INQUIRIES[0]) => {
-    setFormData((prev) => ({
-      ...prev,
-      category: inquiry.category,
-      subject: inquiry.subject,
-      message: inquiry.body,
-    }));
 
-    // Scroll smoothly to direct message form
-    const formElement = document.getElementById("direct-message-form");
-    if (formElement) {
-      formElement.scrollIntoView({ behavior: "smooth" });
-    }
-  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -246,27 +200,21 @@ export default function ContactStaffPage() {
                 </div>
 
                 <div className="flex items-center gap-2 pt-2 border-t border-kalvium-border/40 dark:border-kalvium-dark-border/40">
-                  <a
-                    href={`mailto:${lead.email}`}
-                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-kalvium-coral text-white text-[11px] font-semibold hover:bg-kalvium-coral-dark transition shadow-soft-xs"
-                  >
-                    <Mail size={12} />
-                    <span>Send Email</span>
-                  </a>
                   <button
+                    type="button"
                     onClick={() => copyToClipboard(lead.email)}
-                    className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border border-kalvium-border dark:border-kalvium-dark-border bg-white dark:bg-kalvium-dark-surface text-[11px] font-semibold text-kalvium-text dark:text-kalvium-dark-text hover:border-kalvium-coral transition"
-                    title="Copy Email"
+                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-kalvium-surface-alt dark:bg-kalvium-dark-surface-alt border border-kalvium-border dark:border-kalvium-dark-border hover:border-kalvium-coral text-[11px] font-semibold text-kalvium-text dark:text-kalvium-dark-text transition shadow-soft-xs"
+                    title="Copy Email Address"
                   >
                     {copiedEmail === lead.email ? (
                       <>
                         <Check size={12} className="text-kalvium-success" />
-                        <span className="text-kalvium-success">Copied</span>
+                        <span className="text-kalvium-success">Email Copied!</span>
                       </>
                     ) : (
                       <>
-                        <Copy size={12} />
-                        <span>Copy</span>
+                        <Copy size={12} className="text-kalvium-coral" />
+                        <span>Copy Email Address</span>
                       </>
                     )}
                   </button>
@@ -317,45 +265,6 @@ export default function ContactStaffPage() {
             <span>Open GitHub Issue</span>
             <ExternalLink size={13} />
           </a>
-        </div>
-
-        {/* 1-Click Quick Inquiries Section */}
-        <div className="bg-white dark:bg-kalvium-dark-surface border border-kalvium-border dark:border-kalvium-dark-border rounded-3xl p-6 sm:p-7 shadow-kalvium-sm space-y-4">
-          <div className="space-y-1">
-            <span className="text-[10px] font-bold uppercase tracking-wider text-kalvium-coral block">
-              Quick Templates
-            </span>
-            <h3 className="text-sm font-bold text-kalvium-text dark:text-kalvium-dark-text">
-              Common Inquiries (Click to Auto-Fill Message Below):
-            </h3>
-          </div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            {QUICK_INQUIRIES.map((preset) => {
-              const Icon = preset.icon;
-              return (
-                <button
-                  key={preset.title}
-                  type="button"
-                  onClick={() => handleSelectQuickInquiry(preset)}
-                  className="text-left p-3.5 rounded-2xl bg-kalvium-surface-alt dark:bg-kalvium-dark-surface-alt border border-kalvium-border dark:border-kalvium-dark-border hover:border-kalvium-coral/50 transition group flex items-start gap-3"
-                >
-                  <div className="w-8 h-8 rounded-xl bg-white dark:bg-kalvium-dark-surface text-kalvium-coral flex items-center justify-center shrink-0 shadow-soft-xs group-hover:scale-105 transition">
-                    <Icon size={16} />
-                  </div>
-                  <div className="space-y-0.5">
-                    <p className="text-xs font-bold text-kalvium-text dark:text-kalvium-dark-text group-hover:text-kalvium-coral transition flex items-center gap-1">
-                      <span>{preset.title}</span>
-                      <ArrowRight size={11} className="opacity-0 group-hover:opacity-100 transition" />
-                    </p>
-                    <p className="text-[11px] text-kalvium-muted dark:text-kalvium-dark-muted">
-                      Loads template into the direct message form below.
-                    </p>
-                  </div>
-                </button>
-              );
-            })}
-          </div>
         </div>
 
         {/* Direct Message Form (Formspree Connected) */}
