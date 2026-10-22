@@ -19,7 +19,14 @@ import {
 } from "lucide-react";
 
 function NavbarContent() {
-  const { user, loading, logout } = useAuth();
+  const { user: authUser, loading, logout } = useAuth();
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  const user = mounted ? authUser : null;
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
