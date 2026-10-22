@@ -183,13 +183,6 @@ export default function ContactStaffPage() {
               Need help with your account, reporting a bug, requesting event hosting access, or resolving squad permissions? Send a direct message to student leads or raise a trackable issue.
             </p>
           </div>
-
-          <div className="flex items-center gap-2 self-start sm:self-center">
-            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800/40 text-emerald-600 dark:text-emerald-400 text-xs font-semibold">
-              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-              <span>Formspree Connected</span>
-            </span>
-          </div>
         </div>
       </div>
 
@@ -380,7 +373,7 @@ export default function ContactStaffPage() {
                   Direct Message Support Desk
                 </h2>
                 <p className="text-xs text-kalvium-muted dark:text-kalvium-dark-muted">
-                  Sends directly to Udeep Chowdary & Mageshwaran T via Formspree.
+                  Sends directly to Udeep Chowdary & Mageshwaran T.
                 </p>
               </div>
             </div>
@@ -528,7 +521,7 @@ export default function ContactStaffPage() {
               {/* Submit Button */}
               <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 pt-2">
                 <p className="text-[11px] text-kalvium-muted dark:text-kalvium-dark-muted">
-                  🔒 Secured transmission via Formspree API directly to student leads.
+                  🔒 Secured transmission directly to student leads.
                 </p>
                 <button
                   type="submit"
