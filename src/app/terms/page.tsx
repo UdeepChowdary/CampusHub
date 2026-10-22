@@ -3,39 +3,35 @@
 import React, { useState } from "react";
 import Link from "next/link";
 import {
+  Scale,
   ShieldCheck,
+  UserCheck,
+  Code2,
   FileText,
-  Clock,
-  Sparkles,
   AlertTriangle,
+  Server,
+  Share2,
+  Printer,
+  ChevronRight,
+  BookOpen,
+  Search,
   CheckCircle2,
   Lock,
-  ArrowRight,
-  Printer,
-  Share2,
-  ChevronRight,
-  Scale,
-  Building2,
-  UserCheck,
+  Sparkles,
 } from "lucide-react";
-import CampusVerifiedBadge from "@/components/CampusVerifiedBadge";
 
 const SECTIONS = [
-  { id: "eligibility", title: "1. Community Eligibility & Scope" },
-  { id: "verification-standard", title: "2. The Campus Verification Standard" },
-  { id: "ai-disclaimer", title: "3. Multimodal AI Extraction & Anti-Hallucination" },
-  { id: "api-keys", title: "4. Client-Side API Keys & Security" },
-  { id: "organizer-code", title: "5. Organizer Code of Conduct & Venue Integrity" },
-  { id: "clash-engine", title: "6. Schedule Clash Advisory System" },
-  { id: "moderation", title: "7. Managerial Discretion & Audit Trails" },
-  { id: "intellectual-property", title: "8. Promotional Artwork & Intellectual Property" },
-  { id: "liability", title: "9. Limitation of Liability & Disclaimers" },
-  { id: "amendments", title: "10. Policy Amendments & Contact" },
+  { id: "eligibility", title: "1. Eligibility & Account Responsibilities" },
+  { id: "acceptable-use", title: "2. Acceptable Use" },
+  { id: "content-ownership", title: "3. Content Ownership & Academic Integrity" },
+  { id: "service-availability", title: "4. Service Availability & Modifications" },
+  { id: "verification-gate", title: "5. Campus Manager Verification & Quality Standards" },
 ];
 
 export default function TermsAndConditionsPage() {
   const [activeSection, setActiveSection] = useState("eligibility");
   const [copied, setCopied] = useState(false);
+  const [searchFilter, setSearchFilter] = useState("");
 
   const handleShare = () => {
     if (typeof window !== "undefined") {
@@ -53,16 +49,16 @@ export default function TermsAndConditionsPage() {
 
   return (
     <div className="min-h-screen py-10 sm:py-14 px-4 sm:px-6 lg:px-8 max-w-6xl mx-auto">
-      {/* Breadcrumb & Meta Header */}
+      {/* Breadcrumb & Header */}
       <div className="mb-8">
         <div className="flex items-center gap-2 text-xs text-kalvium-muted dark:text-kalvium-dark-muted mb-3 font-medium">
           <Link href="/" className="hover:text-kalvium-coral transition">
             Home
           </Link>
           <span>/</span>
-          <span className="text-kalvium-text dark:text-kalvium-dark-text font-semibold">Governance & Legal</span>
+          <span className="text-kalvium-text dark:text-kalvium-dark-text font-semibold">Governance</span>
           <span>/</span>
-          <span className="text-kalvium-coral font-semibold">Terms of Service</span>
+          <span className="text-kalvium-coral font-semibold">Terms & Conditions</span>
         </div>
 
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 border-b border-kalvium-border dark:border-kalvium-dark-border">
@@ -74,8 +70,8 @@ export default function TermsAndConditionsPage() {
             <h1 className="text-3xl sm:text-4xl font-display font-bold text-kalvium-text dark:text-kalvium-dark-text tracking-tight">
               Terms & Conditions
             </h1>
-            <p className="text-xs sm:text-sm text-kalvium-muted dark:text-kalvium-dark-muted mt-1 max-w-2xl">
-              Official institutional policies governing event publication, AI extraction assistance, manager certification, and attendee safety across the campus community.
+            <p className="text-xs sm:text-sm text-kalvium-muted dark:text-kalvium-dark-muted mt-1 max-w-2xl leading-relaxed">
+              Welcome to CampusHub. By accessing or using our platform, you agree to comply with and be bound by the following institutional terms and community guidelines.
             </p>
           </div>
 
@@ -99,17 +95,17 @@ export default function TermsAndConditionsPage() {
           </div>
         </div>
 
-        {/* Quick Document Attributes */}
+        {/* Quick Document Key Attributes */}
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mt-6">
           <div className="p-3.5 rounded-2xl bg-white dark:bg-kalvium-dark-surface border border-kalvium-border dark:border-kalvium-dark-border shadow-soft-xs">
             <span className="text-[10px] font-bold uppercase tracking-wider text-kalvium-muted block mb-0.5">
               Effective Date
             </span>
-            <p className="text-xs font-bold text-kalvium-text dark:text-kalvium-dark-text">January 15, 2026</p>
+            <p className="text-xs font-bold text-kalvium-text dark:text-kalvium-dark-text">October 2026</p>
           </div>
           <div className="p-3.5 rounded-2xl bg-white dark:bg-kalvium-dark-surface border border-kalvium-border dark:border-kalvium-dark-border shadow-soft-xs">
             <span className="text-[10px] font-bold uppercase tracking-wider text-kalvium-muted block mb-0.5">
-              Enforcement Status
+              Enforcement
             </span>
             <span className="inline-flex items-center gap-1 text-xs font-bold text-kalvium-success">
               <span className="w-1.5 h-1.5 rounded-full bg-kalvium-success animate-pulse" />
@@ -118,22 +114,58 @@ export default function TermsAndConditionsPage() {
           </div>
           <div className="p-3.5 rounded-2xl bg-white dark:bg-kalvium-dark-surface border border-kalvium-border dark:border-kalvium-dark-border shadow-soft-xs">
             <span className="text-[10px] font-bold uppercase tracking-wider text-kalvium-muted block mb-0.5">
-              Applies To
+              Target Audience
             </span>
-            <p className="text-xs font-bold text-kalvium-text dark:text-kalvium-dark-text">Students, Clubs, Staff</p>
+            <p className="text-xs font-bold text-kalvium-text dark:text-kalvium-dark-text">AIFT Students & Mentors</p>
           </div>
           <div className="p-3.5 rounded-2xl bg-white dark:bg-kalvium-dark-surface border border-kalvium-border dark:border-kalvium-dark-border shadow-soft-xs">
             <span className="text-[10px] font-bold uppercase tracking-wider text-kalvium-muted block mb-0.5">
-              Version
+              Squad Leads
             </span>
-            <p className="text-xs font-bold text-kalvium-text dark:text-kalvium-dark-text">v2.4 (Kalvium Ecosystem)</p>
+            <p className="text-xs font-bold text-kalvium-text dark:text-kalvium-dark-text">Squad 83 (SRM-AP)</p>
+          </div>
+        </div>
+
+        {/* High-Level Summary Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-3 mt-4">
+          <div className="p-3.5 rounded-2xl bg-kalvium-surface-alt dark:bg-kalvium-dark-surface-alt border border-kalvium-border dark:border-kalvium-dark-border">
+            <span className="text-[11px] font-bold text-kalvium-coral flex items-center gap-1.5 mb-1">
+              <UserCheck size={14} /> 1. AIFT Exclusive
+            </span>
+            <p className="text-[11px] text-kalvium-muted dark:text-kalvium-dark-muted leading-relaxed">
+              Restricted to verified Kalvium students and mentors in the AI & Future Tech cohort.
+            </p>
+          </div>
+          <div className="p-3.5 rounded-2xl bg-kalvium-surface-alt dark:bg-kalvium-dark-surface-alt border border-kalvium-border dark:border-kalvium-dark-border">
+            <span className="text-[11px] font-bold text-kalvium-coral flex items-center gap-1.5 mb-1">
+              <ShieldCheck size={14} /> 2. Academic Purpose
+            </span>
+            <p className="text-[11px] text-kalvium-muted dark:text-kalvium-dark-muted leading-relaxed">
+              Designed for hackathons, technical sprints, squad projects, and verified meetups.
+            </p>
+          </div>
+          <div className="p-3.5 rounded-2xl bg-kalvium-surface-alt dark:bg-kalvium-dark-surface-alt border border-kalvium-border dark:border-kalvium-dark-border">
+            <span className="text-[11px] font-bold text-kalvium-coral flex items-center gap-1.5 mb-1">
+              <Code2 size={14} /> 3. Creator Rights
+            </span>
+            <p className="text-[11px] text-kalvium-muted dark:text-kalvium-dark-muted leading-relaxed">
+              You own your posted content, grant display license to CampusHub, and follow honor code.
+            </p>
+          </div>
+          <div className="p-3.5 rounded-2xl bg-kalvium-surface-alt dark:bg-kalvium-dark-surface-alt border border-kalvium-border dark:border-kalvium-dark-border">
+            <span className="text-[11px] font-bold text-kalvium-coral flex items-center gap-1.5 mb-1">
+              <Server size={14} /> 4. Reliable Service
+            </span>
+            <p className="text-[11px] text-kalvium-muted dark:text-kalvium-dark-muted leading-relaxed">
+              Continuous updates, data migrations, and scheduled maintenance for peak reliability.
+            </p>
           </div>
         </div>
       </div>
 
       {/* Main Two-Column Layout */}
       <div className="grid grid-cols-1 lg:grid-cols-[280px_1fr] gap-10 items-start">
-        {/* Sticky Table of Contents Sidebar */}
+        {/* Sticky Sidebar */}
         <aside className="sticky top-20 hidden lg:block bg-white dark:bg-kalvium-dark-surface border border-kalvium-border dark:border-kalvium-dark-border rounded-2xl p-4 shadow-soft-xs">
           <p className="text-[11px] font-bold uppercase tracking-wider text-kalvium-muted dark:text-kalvium-dark-muted mb-3 px-2">
             Table of Contents
@@ -164,7 +196,7 @@ export default function TermsAndConditionsPage() {
                 href="/privacy"
                 className="text-xs text-kalvium-coral hover:underline flex items-center gap-1 font-semibold"
               >
-                <span>Privacy & Data Policy</span>
+                <span>Privacy Policy</span>
                 <ChevronRight size={12} />
               </Link>
               <Link
@@ -178,225 +210,199 @@ export default function TermsAndConditionsPage() {
                 href="/faq"
                 className="text-xs text-kalvium-coral hover:underline flex items-center gap-1 font-semibold"
               >
-                <span>Support & FAQ</span>
+                <span>Help Center & FAQ</span>
+                <ChevronRight size={12} />
+              </Link>
+              <Link
+                href="/contact"
+                className="text-xs text-kalvium-coral hover:underline flex items-center gap-1 font-semibold"
+              >
+                <span>Contact Staff</span>
                 <ChevronRight size={12} />
               </Link>
             </div>
           </div>
         </aside>
 
-        {/* Legal Text Content Body */}
+        {/* Content Body */}
         <div className="bg-white dark:bg-kalvium-dark-surface border border-kalvium-border dark:border-kalvium-dark-border rounded-3xl p-6 sm:p-10 shadow-kalvium-sm space-y-10 leading-relaxed text-xs sm:text-sm text-kalvium-text dark:text-kalvium-dark-text">
           {/* Section 1 */}
-          <section id="eligibility" className="scroll-mt-24 space-y-3">
-            <h2 className="text-lg sm:text-xl font-bold font-sans tracking-tight text-kalvium-ink dark:text-kalvium-dark-ink flex items-center gap-2">
-              <Building2 className="w-5 h-5 text-kalvium-coral shrink-0" />
-              <span>1. Community Eligibility & Scope</span>
-            </h2>
-            <p className="text-kalvium-muted dark:text-kalvium-dark-muted">
-              Campus Event Hub ("CampusHub", "the Platform") is a proprietary campus event discovery, scheduling, and verification platform designed specifically for students, faculty, club leaders, and administrative personnel within the Kalvium educational network.
-            </p>
-            <p className="text-kalvium-muted dark:text-kalvium-dark-muted">
-              By registering an account, proposing an event, analyzing promotional flyers, saving items to your personal agenda, or accessing the verified feed, you enter into a legally binding agreement to comply with these Terms & Conditions and all applicable university policies.
-            </p>
-            <div className="p-4 rounded-2xl bg-kalvium-surface-alt dark:bg-kalvium-dark-surface-alt border border-kalvium-border dark:border-kalvium-dark-border">
-              <p className="font-semibold text-kalvium-text dark:text-kalvium-dark-text text-xs">
-                Domain Restriction Notice:
+          <section id="eligibility" className="scroll-mt-24 space-y-4">
+            <div className="flex items-center gap-2.5 pb-2 border-b border-kalvium-border/70 dark:border-kalvium-dark-border/70">
+              <div className="w-8 h-8 rounded-xl bg-kalvium-coral-tint dark:bg-kalvium-dark-coral-tint text-kalvium-coral flex items-center justify-center font-bold">
+                <UserCheck size={18} />
+              </div>
+              <h2 className="text-lg sm:text-xl font-bold font-sans tracking-tight text-kalvium-ink dark:text-kalvium-dark-ink">
+                1. Eligibility & Account Responsibilities
+              </h2>
+            </div>
+
+            <div className="space-y-3 text-kalvium-muted dark:text-kalvium-dark-muted leading-relaxed">
+              <p>
+                Access to CampusHub is exclusively designated for enrolled students, mentors, and faculty belonging to the{" "}
+                <strong className="text-kalvium-text dark:text-kalvium-dark-text">
+                  Artificial Intelligence & Future Technologies (AIFT)
+                </strong>{" "}
+                program at SRM University-AP in partnership with Kalvium.
               </p>
-              <p className="text-xs text-kalvium-muted dark:text-kalvium-dark-muted mt-1">
-                Account creation is restricted to verified campus email domains ending in <code className="bg-white dark:bg-kalvium-dark-surface px-1.5 py-0.5 rounded border border-kalvium-border dark:border-kalvium-dark-border font-mono text-[11px]">@kalvium.community</code> or <code className="bg-white dark:bg-kalvium-dark-surface px-1.5 py-0.5 rounded border border-kalvium-border dark:border-kalvium-dark-border font-mono text-[11px]">@kalvium.com</code>. Unauthorized third-party registrations are strictly prohibited.
-              </p>
+
+              <div className="p-4 rounded-2xl bg-kalvium-surface-alt dark:bg-kalvium-dark-surface-alt border border-kalvium-border dark:border-kalvium-dark-border space-y-2">
+                <div className="flex items-center gap-2 text-xs font-bold text-kalvium-text dark:text-kalvium-dark-text">
+                  <CheckCircle2 size={15} className="text-kalvium-coral" />
+                  <span>Key Responsibilities for Account Holders:</span>
+                </div>
+                <ul className="list-disc pl-5 space-y-1.5 text-xs text-kalvium-muted dark:text-kalvium-dark-muted">
+                  <li>
+                    <strong className="text-kalvium-text dark:text-kalvium-dark-text">Credential Security:</strong> You are fully responsible for maintaining the confidentiality of your login credentials and for all activities conducted under your student account.
+                  </li>
+                  <li>
+                    <strong className="text-kalvium-text dark:text-kalvium-dark-text">Authentic Identity:</strong> Account details must be authentic, valid, and accurately represent your real name and identity within your assigned AIFT squad and cohort.
+                  </li>
+                  <li>
+                    <strong className="text-kalvium-text dark:text-kalvium-dark-text">Email Domain Restrictions:</strong> Registration and login require an authorized academic email ending in <code className="bg-white dark:bg-kalvium-dark-surface px-1.5 py-0.5 rounded border border-kalvium-border dark:border-kalvium-dark-border font-mono text-[11px]">@kalvium.community</code> or <code className="bg-white dark:bg-kalvium-dark-surface px-1.5 py-0.5 rounded border border-kalvium-border dark:border-kalvium-dark-border font-mono text-[11px]">@kalvium.com</code>.
+                  </li>
+                </ul>
+              </div>
             </div>
           </section>
 
           {/* Section 2 */}
-          <section id="verification-standard" className="scroll-mt-24 space-y-3">
-            <h2 className="text-lg sm:text-xl font-bold font-sans tracking-tight text-kalvium-ink dark:text-kalvium-dark-ink flex items-center gap-2">
-              <ShieldCheck className="w-5 h-5 text-kalvium-success shrink-0" />
-              <span>2. The Campus Verification Standard</span>
-            </h2>
-            <p className="text-kalvium-muted dark:text-kalvium-dark-muted">
-              The foundational pillar of CampusHub is absolute authenticity. Every event displayed in the public student feed must bear the official <span className="font-bold text-kalvium-success">✓ CAMPUS VERIFIED</span> seal.
-            </p>
-            <ul className="list-disc pl-5 space-y-2 text-kalvium-muted dark:text-kalvium-dark-muted">
-              <li>
-                <strong className="text-kalvium-text dark:text-kalvium-dark-text">Zero Self-Approval:</strong> Neither student organizers nor club executives possess the technical or administrative privilege to mark their own events as approved.
-              </li>
-              <li>
-                <strong className="text-kalvium-text dark:text-kalvium-dark-text">Campus Manager Quality Gate:</strong> Only designated Campus Managers with authenticated administrative custom claims can review, edit, approve, or decline draft events.
-              </li>
-              <li>
-                <strong className="text-kalvium-text dark:text-kalvium-dark-text">Provisional Status:</strong> All newly submitted events, whether generated via Gemini AI vision extraction or submitted manually, remain in <code className="bg-kalvium-surface-alt dark:bg-kalvium-dark-surface-alt px-1.5 py-0.5 rounded text-[11px] font-mono">PENDING</code> status until formal verification.
-              </li>
-            </ul>
+          <section id="acceptable-use" className="scroll-mt-24 space-y-4">
+            <div className="flex items-center gap-2.5 pb-2 border-b border-kalvium-border/70 dark:border-kalvium-dark-border/70">
+              <div className="w-8 h-8 rounded-xl bg-kalvium-coral-tint dark:bg-kalvium-dark-coral-tint text-kalvium-coral flex items-center justify-center font-bold">
+                <ShieldCheck size={18} />
+              </div>
+              <h2 className="text-lg sm:text-xl font-bold font-sans tracking-tight text-kalvium-ink dark:text-kalvium-dark-ink">
+                2. Acceptable Use Policy
+              </h2>
+            </div>
+
+            <div className="space-y-3 text-kalvium-muted dark:text-kalvium-dark-muted leading-relaxed">
+              <p>
+                CampusHub is engineered specifically for AIFT academic collaboration, technical project tracking, hackathon/event coordination, and squad communication.
+              </p>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
+                <div className="p-4 rounded-2xl bg-emerald-50/50 dark:bg-emerald-950/20 border border-emerald-200 dark:border-emerald-800/40 space-y-1.5">
+                  <span className="text-xs font-bold text-emerald-700 dark:text-emerald-400 flex items-center gap-1.5">
+                    <CheckCircle2 size={14} /> Permitted Activities
+                  </span>
+                  <ul className="text-xs text-kalvium-muted dark:text-kalvium-dark-muted space-y-1 pl-4 list-disc">
+                    <li>Coordinating campus workshops & sprints</li>
+                    <li>Publishing technical team deliverables</li>
+                    <li>Managing personal schedules & clash checks</li>
+                    <li>Peer squad discussions and event RSVPs</li>
+                  </ul>
+                </div>
+
+                <div className="p-4 rounded-2xl bg-rose-50/50 dark:bg-rose-950/20 border border-rose-200 dark:border-rose-800/40 space-y-1.5">
+                  <span className="text-xs font-bold text-rose-700 dark:text-rose-400 flex items-center gap-1.5">
+                    <AlertTriangle size={14} /> Strictly Prohibited
+                  </span>
+                  <ul className="text-xs text-kalvium-muted dark:text-kalvium-dark-muted space-y-1 pl-4 list-disc">
+                    <li>Abusive, defamatory, or disruptive content</li>
+                    <li>Spamming discussion channels or peer threads</li>
+                    <li>Reverse-engineering or probing API endpoints</li>
+                    <li>Unauthorized database access or scraping</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
           </section>
 
           {/* Section 3 */}
-          <section id="ai-disclaimer" className="scroll-mt-24 space-y-3">
-            <h2 className="text-lg sm:text-xl font-bold font-sans tracking-tight text-kalvium-ink dark:text-kalvium-dark-ink flex items-center gap-2">
-              <Sparkles className="w-5 h-5 text-kalvium-coral shrink-0" />
-              <span>3. Multimodal AI Extraction & Anti-Hallucination Policy</span>
-            </h2>
-            <p className="text-kalvium-muted dark:text-kalvium-dark-muted">
-              CampusHub integrates Google Gemini Vision models to assist organizers by performing optical character recognition (OCR) and structured text extraction from promotional flyers.
-            </p>
-            <div className="p-4 rounded-2xl bg-kalvium-coral-tint dark:bg-kalvium-dark-coral-tint border border-kalvium-coral/30">
-              <div className="flex items-center gap-2 text-kalvium-coral font-bold text-xs mb-1">
-                <AlertTriangle size={15} />
-                <span>Anti-Hallucination & Non-Fabrication Guarantee</span>
+          <section id="content-ownership" className="scroll-mt-24 space-y-4">
+            <div className="flex items-center gap-2.5 pb-2 border-b border-kalvium-border/70 dark:border-kalvium-dark-border/70">
+              <div className="w-8 h-8 rounded-xl bg-kalvium-coral-tint dark:bg-kalvium-dark-coral-tint text-kalvium-coral flex items-center justify-center font-bold">
+                <Code2 size={18} />
               </div>
-              <p className="text-xs text-kalvium-muted dark:text-kalvium-dark-muted leading-relaxed">
-                The AI extraction engine operates under strict guardrails. It is explicitly instructed never to fabricate dates, guest speakers, prize amounts, or venues. When text is partially obscured or absent from the poster, it returns <code className="font-mono text-[11px]">Not specified</code> or <code className="font-mono text-[11px]">Needs verification</code>. AI confidence tiers (<span className="text-kalvium-success font-semibold">HIGH</span>, <span className="text-kalvium-warning font-semibold">MEDIUM</span>, <span className="text-kalvium-coral font-semibold">LOW</span>) reflect optical certainty only, and do not constitute official university authorization.
+              <h2 className="text-lg sm:text-xl font-bold font-sans tracking-tight text-kalvium-ink dark:text-kalvium-dark-ink">
+                3. Content Ownership & Academic Integrity
+              </h2>
+            </div>
+
+            <div className="space-y-3 text-kalvium-muted dark:text-kalvium-dark-muted leading-relaxed">
+              <p>
+                Content posted by users (including event announcements, code snippets, documentation, and squad deliverables) remains the intellectual property of the original creator.
               </p>
+
+              <div className="p-4 rounded-2xl bg-kalvium-surface-alt dark:bg-kalvium-dark-surface-alt border border-kalvium-border dark:border-kalvium-dark-border space-y-2">
+                <p className="text-xs leading-relaxed">
+                  <strong className="text-kalvium-text dark:text-kalvium-dark-text">Platform License:</strong> By posting on CampusHub, you grant the platform a non-exclusive, worldwide, royalty-free license to display, index, and organize your content across the campus network for discovery and archival purposes.
+                </p>
+                <p className="text-xs leading-relaxed">
+                  <strong className="text-kalvium-text dark:text-kalvium-dark-text">Academic Honor Code:</strong> Users must adhere strictly to academic integrity regulations and department honor codes. Plagiarism, unauthorized distribution of course assessments, sharing unreleased grading criteria, or releasing proprietary project assets without permission is grounds for immediate access termination.
+                </p>
+              </div>
             </div>
           </section>
 
           {/* Section 4 */}
-          <section id="api-keys" className="scroll-mt-24 space-y-3">
-            <h2 className="text-lg sm:text-xl font-bold font-sans tracking-tight text-kalvium-ink dark:text-kalvium-dark-ink flex items-center gap-2">
-              <Lock className="w-5 h-5 text-kalvium-coral shrink-0" />
-              <span>4. Client-Side API Keys & Privacy Architecture</span>
-            </h2>
-            <p className="text-kalvium-muted dark:text-kalvium-dark-muted">
-              CampusHub enforces a strict <strong className="text-kalvium-text dark:text-kalvium-dark-text">Zero-Persistence Policy</strong> for external AI API credentials:
+          <section id="service-availability" className="scroll-mt-24 space-y-4">
+            <div className="flex items-center gap-2.5 pb-2 border-b border-kalvium-border/70 dark:border-kalvium-dark-border/70">
+              <div className="w-8 h-8 rounded-xl bg-kalvium-coral-tint dark:bg-kalvium-dark-coral-tint text-kalvium-coral flex items-center justify-center font-bold">
+                <Server size={18} />
+              </div>
+              <h2 className="text-lg sm:text-xl font-bold font-sans tracking-tight text-kalvium-ink dark:text-kalvium-dark-ink">
+                4. Service Availability & Platform Modifications
+              </h2>
+            </div>
+
+            <p className="text-kalvium-muted dark:text-kalvium-dark-muted leading-relaxed">
+              CampusHub is maintained as a dedicated utility for the AIFT student community. We continually optimize the platform and reserve the right to deploy updates, enhance feature sets, improve security protocols, or temporarily suspend access for scheduled server maintenance and database upgrades. Advance notification will be provided whenever practicable for major maintenance windows.
             </p>
-            <ul className="list-disc pl-5 space-y-1.5 text-kalvium-muted dark:text-kalvium-dark-muted">
-              <li>When users provide their Google Gemini API key to run flyer analysis, that key is stored strictly within their client device's browser <code className="font-mono text-[11px]">localStorage</code>.</li>
-              <li>Zero Gemini API keys are written to, stored in, or transmitted to the Cloud Firestore database.</li>
-              <li>Users may clear or rotate their client-side key at any time in the Create Event Studio.</li>
-              <li>The platform provides pre-calibrated sample posters for demonstration without requiring any API key.</li>
-            </ul>
           </section>
 
           {/* Section 5 */}
-          <section id="organizer-code" className="scroll-mt-24 space-y-3">
-            <h2 className="text-lg sm:text-xl font-bold font-sans tracking-tight text-kalvium-ink dark:text-kalvium-dark-ink flex items-center gap-2">
-              <UserCheck className="w-5 h-5 text-kalvium-coral shrink-0" />
-              <span>5. Organizer Code of Conduct & Venue Integrity</span>
-            </h2>
-            <p className="text-kalvium-muted dark:text-kalvium-dark-muted">
-              Event organizers and student clubs represent the university's vibrant co-curricular life and must uphold high standards of academic and community integrity.
-            </p>
-            <ul className="list-disc pl-5 space-y-2 text-kalvium-muted dark:text-kalvium-dark-muted">
-              <li>
-                <strong>Legitimate Room & Hall Bookings:</strong> Organizers may only submit events for physical campus spaces (e.g. Main Auditorium, CS Seminar Hall) if they have received prior room authorization through appropriate university facility coordinators.
-              </li>
-              <li>
-                <strong>Duplicate Spam Prohibition:</strong> Organizers shall not flood the queue with duplicate drafts of the same event. Submissions flagged with a $\ge 0.75$ title similarity or identical venue/start-time slots will be rejected by the pre-submission detector.
-              </li>
-              <li>
-                <strong>Prohibited Material:</strong> Events promoting hate speech, unapproved commercial solicitations, hazardous activities, or academic misconduct are strictly forbidden.
-              </li>
-            </ul>
-          </section>
-
-          {/* Section 6 */}
-          <section id="clash-engine" className="scroll-mt-24 space-y-3">
-            <h2 className="text-lg sm:text-xl font-bold font-sans tracking-tight text-kalvium-ink dark:text-kalvium-dark-ink flex items-center gap-2">
-              <Clock className="w-5 h-5 text-kalvium-coral shrink-0" />
-              <span>6. Mathematical Schedule Clash Advisory System</span>
-            </h2>
-            <p className="text-kalvium-muted dark:text-kalvium-dark-muted">
-              The Schedule Clash Detection Engine is provided as a student utility to prevent accidental double-booking.
-            </p>
-            <p className="text-kalvium-muted dark:text-kalvium-dark-muted">
-              The engine operates on strict non-blocking mathematical intervals:
-              <br />
-              <code className="block bg-kalvium-surface-alt dark:bg-kalvium-dark-surface-alt p-2 rounded-xl my-2 text-[11px] font-mono text-center">
-                Overlap = (startA &lt; endB) &amp;&amp; (startB &lt; endA)
-              </code>
-              Clash warnings are advisory. While the platform alerts students to conflicting commitments, students retain the option to override and "Save Anyway". Saving an event to your personal schedule does not constitute official academic course enrollment or academic leave of absence.
-            </p>
-          </section>
-
-          {/* Section 7 */}
-          <section id="moderation" className="scroll-mt-24 space-y-3">
-            <h2 className="text-lg sm:text-xl font-bold font-sans tracking-tight text-kalvium-ink dark:text-kalvium-dark-ink flex items-center gap-2">
-              <Scale className="w-5 h-5 text-kalvium-coral shrink-0" />
-              <span>7. Managerial Discretion & Audit Trails</span>
-            </h2>
-            <p className="text-kalvium-muted dark:text-kalvium-dark-muted">
-              Campus Managers reserve the ultimate authority to:
-            </p>
-            <ul className="list-disc pl-5 space-y-1.5 text-kalvium-muted dark:text-kalvium-dark-muted">
-              <li>Edit and correct inaccurate dates, times, venues, or descriptions prior to event approval.</li>
-              <li>Decline submissions that violate university guidelines, providing structured feedback reasons.</li>
-              <li>Revoke approval and unpublish an event from the student feed if safety or scheduling circumstances change.</li>
-            </ul>
-            <p className="text-kalvium-muted dark:text-kalvium-dark-muted mt-2">
-              Every managerial decision is permanently logged in the <code className="font-mono text-[11px]">approvalHistory</code> database audit trail with manager credentials, exact ISO timestamps, and review notes.
-            </p>
-          </section>
-
-          {/* Section 8 */}
-          <section id="intellectual-property" className="scroll-mt-24 space-y-3">
-            <h2 className="text-lg sm:text-xl font-bold font-sans tracking-tight text-kalvium-ink dark:text-kalvium-dark-ink flex items-center gap-2">
-              <FileText className="w-5 h-5 text-kalvium-coral shrink-0" />
-              <span>8. Promotional Artwork & Intellectual Property</span>
-            </h2>
-            <p className="text-kalvium-muted dark:text-kalvium-dark-muted">
-              By uploading a poster or graphic asset, you warrant that your club or organization owns or possesses appropriate permission to distribute the visual artwork. You grant CampusHub and Kalvium a non-exclusive license to host, display, and analyze the image solely for campus event discovery and archiving.
-            </p>
-          </section>
-
-          {/* Section 9 */}
-          <section id="liability" className="scroll-mt-24 space-y-3">
-            <h2 className="text-lg sm:text-xl font-bold font-sans tracking-tight text-kalvium-ink dark:text-kalvium-dark-ink flex items-center gap-2">
-              <AlertTriangle className="w-5 h-5 text-kalvium-coral shrink-0" />
-              <span>9. Limitation of Liability & Disclaimers</span>
-            </h2>
-            <p className="text-kalvium-muted dark:text-kalvium-dark-muted">
-              CampusHub is provided on an "as-is" and "as-available" basis. While our rigorous verification protocol substantially eliminates inaccurate event notices, the platform is not liable for last-minute speaker cancellations, weather-related venue relocations, or external ticketing link issues managed outside of CampusHub.
-            </p>
-          </section>
-
-          {/* Section 10 */}
-          <section id="amendments" className="scroll-mt-24 space-y-3">
-            <h2 className="text-lg sm:text-xl font-bold font-sans tracking-tight text-kalvium-ink dark:text-kalvium-dark-ink flex items-center gap-2">
-              <CheckCircle2 className="w-5 h-5 text-kalvium-coral shrink-0" />
-              <span>10. Policy Amendments & Administration Contact</span>
-            </h2>
-            <p className="text-kalvium-muted dark:text-kalvium-dark-muted">
-              We may update these Terms from time to time to accommodate new campus technological features or university policies. Continued use of CampusHub following notice of updates constitutes acceptance of the amended terms.
-            </p>
-            <div className="p-4 rounded-2xl bg-kalvium-surface-alt dark:bg-kalvium-dark-surface-alt border border-kalvium-border dark:border-kalvium-dark-border mt-4">
-              <p className="font-semibold text-xs text-kalvium-text dark:text-kalvium-dark-text">
-                Questions or Concerns?
-              </p>
-              <p className="text-xs text-kalvium-muted dark:text-kalvium-dark-muted mt-1">
-                For administrative inquiries, role elevation requests, or governance questions, contact the Campus Management Office at{" "}
-                <a
-                  href="mailto:campus-hub@kalvium.community"
-                  className="text-kalvium-coral font-bold hover:underline"
-                >
-                  campus-hub@kalvium.community
-                </a>
-                .
-              </p>
+          <section id="verification-gate" className="scroll-mt-24 space-y-4">
+            <div className="flex items-center gap-2.5 pb-2 border-b border-kalvium-border/70 dark:border-kalvium-dark-border/70">
+              <div className="w-8 h-8 rounded-xl bg-kalvium-coral-tint dark:bg-kalvium-dark-coral-tint text-kalvium-coral flex items-center justify-center font-bold">
+                <Sparkles size={18} />
+              </div>
+              <h2 className="text-lg sm:text-xl font-bold font-sans tracking-tight text-kalvium-ink dark:text-kalvium-dark-ink">
+                5. Campus Manager Verification & Quality Standards
+              </h2>
             </div>
-          </section>
 
-          {/* Bottom Action Footer */}
-          <div className="pt-6 border-t border-kalvium-border dark:border-kalvium-dark-border flex flex-col sm:flex-row items-center justify-between gap-4">
-            <div className="flex items-center gap-2">
-              <CampusVerifiedBadge size="sm" />
-              <span className="text-xs font-semibold text-kalvium-muted">
-                Official Kalvium Campus Standard
+            <p className="text-kalvium-muted dark:text-kalvium-dark-muted leading-relaxed">
+              To prevent misinformation and unauthorized postings, all events submitted by students or organizers undergo a mandatory verification review by authenticated Campus Managers.
+            </p>
+
+            <div className="p-4 rounded-2xl bg-kalvium-coral-tint/40 dark:bg-kalvium-dark-coral-tint/30 border border-kalvium-coral/30 space-y-2">
+              <span className="text-xs font-bold text-kalvium-coral flex items-center gap-1.5">
+                <Lock size={14} /> Zero Self-Approval Guarantee
               </span>
+              <p className="text-xs text-kalvium-muted dark:text-kalvium-dark-muted leading-relaxed">
+                Neither student organizers nor club leads can approve their own submissions. Every event marked with the official verification badge has had its venue, date, time, and organizer authenticated against university guidelines.
+              </p>
             </div>
-            <div className="flex items-center gap-3">
-              <Link
-                href="/privacy"
-                className="text-xs font-semibold text-kalvium-muted hover:text-kalvium-coral transition"
-              >
-                Privacy Policy →
-              </Link>
-              <Link
-                href="/guidelines"
-                className="text-xs font-bold text-kalvium-coral hover:underline"
-              >
-                Hosting Guidelines →
-              </Link>
+          </section>
+
+          {/* Bottom Card */}
+          <div className="pt-6 border-t border-kalvium-border dark:border-kalvium-dark-border">
+            <div className="p-5 rounded-2xl bg-kalvium-surface-alt dark:bg-kalvium-dark-surface-alt border border-kalvium-border dark:border-kalvium-dark-border flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+              <div>
+                <p className="text-xs font-bold text-kalvium-text dark:text-kalvium-dark-text">
+                  Have questions regarding our institutional terms?
+                </p>
+                <p className="text-xs text-kalvium-muted dark:text-kalvium-dark-muted mt-0.5">
+                  Reach out directly to the student development leads in Squad 83.
+                </p>
+              </div>
+              <div className="flex items-center gap-2 shrink-0">
+                <Link
+                  href="/contact"
+                  className="px-4 py-2 rounded-xl bg-kalvium-coral text-white font-semibold text-xs hover:bg-kalvium-coral-dark transition shadow-soft-xs"
+                >
+                  Contact Staff
+                </Link>
+                <Link
+                  href="/privacy"
+                  className="px-4 py-2 rounded-xl border border-kalvium-border dark:border-kalvium-dark-border bg-white dark:bg-kalvium-dark-surface text-xs font-semibold text-kalvium-text dark:text-kalvium-dark-text hover:border-kalvium-coral transition"
+                >
+                  Privacy Policy
+                </Link>
+              </div>
             </div>
           </div>
         </div>

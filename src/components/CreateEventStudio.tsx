@@ -1302,7 +1302,7 @@ export default function CreateEventStudio({ onComplete }: CreateEventStudioProps
                 type="text"
                 value={formData.contactInfo}
                 onChange={(e) => setFormData({ ...formData, contactInfo: e.target.value })}
-                placeholder="organizer@campus.edu or WhatsApp number"
+                placeholder="udeep.chowdary.s83@kalvium.community or WhatsApp number"
                 className="w-full bg-kalvium-surface-alt dark:bg-kalvium-dark-surface-alt border border-kalvium-border dark:border-kalvium-dark-border rounded-xl px-4 py-2.5 text-sm text-kalvium-text dark:text-kalvium-dark-text focus:outline-none focus:border-kalvium-coral"
               />
             </div>

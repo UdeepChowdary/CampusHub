@@ -5,36 +5,31 @@ import Link from "next/link";
 import {
   ShieldCheck,
   Lock,
-  Eye,
-  Key,
-  Server,
+  UserCheck,
   Database,
-  FileCheck,
-  CheckCircle2,
-  AlertCircle,
   Share2,
   Printer,
   ChevronRight,
-  UserCheck,
+  Eye,
+  Server,
+  FileCheck,
+  CheckCircle2,
+  Key,
   HardDrive,
-  Clock,
+  HeartHandshake,
+  AlertCircle,
 } from "lucide-react";
-import CampusVerifiedBadge from "@/components/CampusVerifiedBadge";
 
 const SECTIONS = [
-  { id: "overview", title: "1. Privacy Overview & Commitments" },
-  { id: "information-collected", title: "2. Information We Collect" },
-  { id: "api-key-zero-storage", title: "3. Zero-Storage for Gemini API Keys" },
-  { id: "cookies-sessions", title: "4. Session Cookies & Edge Security" },
-  { id: "media-storage", title: "5. Poster Media & Cloud Storage" },
-  { id: "third-parties", title: "6. Cloud Providers & Third Parties" },
-  { id: "student-rights", title: "7. Your Rights & Data Portability" },
-  { id: "retention", title: "8. Data Retention & Deletion" },
-  { id: "contact", title: "9. Data Protection Contact" },
+  { id: "information-collected", title: "1. Information Collected" },
+  { id: "how-information-used", title: "2. How Information Is Used" },
+  { id: "data-sharing-security", title: "3. Data Sharing & Platform Security" },
+  { id: "zero-storage-keys", title: "4. Zero-Storage Policy for AI Keys" },
+  { id: "student-rights", title: "5. Student Rights & Data Requests" },
 ];
 
 export default function PrivacyPolicyPage() {
-  const [activeSection, setActiveSection] = useState("overview");
+  const [activeSection, setActiveSection] = useState("information-collected");
   const [copied, setCopied] = useState(false);
 
   const handleShare = () => {
@@ -60,22 +55,22 @@ export default function PrivacyPolicyPage() {
             Home
           </Link>
           <span>/</span>
-          <span className="text-kalvium-text dark:text-kalvium-dark-text font-semibold">Governance & Legal</span>
+          <span className="text-kalvium-text dark:text-kalvium-dark-text font-semibold">Governance</span>
           <span>/</span>
           <span className="text-kalvium-coral font-semibold">Privacy Policy</span>
         </div>
 
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 border-b border-kalvium-border dark:border-kalvium-dark-border">
           <div>
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-kalvium-success-tint dark:bg-kalvium-dark-success-tint border border-kalvium-success/20 text-kalvium-success text-xs font-bold mb-2">
-              <Lock size={13} />
-              <span>Campus Data Protection & Confidentiality</span>
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-kalvium-coral-tint dark:bg-kalvium-dark-coral-tint border border-kalvium-coral/20 text-kalvium-coral text-xs font-bold mb-2">
+              <ShieldCheck size={13} />
+              <span>Campus Data Governance & Privacy</span>
             </div>
             <h1 className="text-3xl sm:text-4xl font-display font-bold text-kalvium-text dark:text-kalvium-dark-text tracking-tight">
               Privacy Policy
             </h1>
-            <p className="text-xs sm:text-sm text-kalvium-muted dark:text-kalvium-dark-muted mt-1 max-w-2xl">
-              How CampusHub protects your student identity, safeguards calendar schedules, and enforces a strict zero-persistence architecture for AI credentials.
+            <p className="text-xs sm:text-sm text-kalvium-muted dark:text-kalvium-dark-muted mt-1 max-w-2xl leading-relaxed">
+              CampusHub respects your personal privacy and commits to safeguarding your data within our academic ecosystem with strict institutional protections.
             </p>
           </div>
 
@@ -83,6 +78,7 @@ export default function PrivacyPolicyPage() {
             <button
               onClick={handleShare}
               className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-kalvium-border dark:border-kalvium-dark-border bg-white dark:bg-kalvium-dark-surface text-xs font-semibold text-kalvium-text dark:text-kalvium-dark-text hover:border-kalvium-coral transition shadow-soft-xs"
+              title="Copy page URL"
             >
               <Share2 size={13} />
               <span>{copied ? "Link Copied!" : "Share"}</span>
@@ -90,6 +86,7 @@ export default function PrivacyPolicyPage() {
             <button
               onClick={handlePrint}
               className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-kalvium-border dark:border-kalvium-dark-border bg-white dark:bg-kalvium-dark-surface text-xs font-semibold text-kalvium-text dark:text-kalvium-dark-text hover:border-kalvium-coral transition shadow-soft-xs print:hidden"
+              title="Print document"
             >
               <Printer size={13} />
               <span>Print</span>
@@ -97,58 +94,57 @@ export default function PrivacyPolicyPage() {
           </div>
         </div>
 
-        {/* Highlight Guarantee Cards */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mt-6">
-          <div className="p-4 rounded-2xl bg-white dark:bg-kalvium-dark-surface border border-kalvium-border dark:border-kalvium-dark-border shadow-soft-xs flex items-start gap-3">
-            <div className="p-2 rounded-xl bg-kalvium-coral-tint dark:bg-kalvium-dark-coral-tint text-kalvium-coral shrink-0">
-              <Key size={18} />
-            </div>
-            <div>
-              <span className="text-[11px] font-bold text-kalvium-text dark:text-kalvium-dark-text block">
-                Zero Gemini Key Storage
-              </span>
-              <p className="text-[11px] text-kalvium-muted dark:text-kalvium-dark-muted mt-0.5">
-                API keys stay on your local device only and are never saved to our database.
-              </p>
-            </div>
+        {/* Quick Attributes */}
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mt-6">
+          <div className="p-3.5 rounded-2xl bg-white dark:bg-kalvium-dark-surface border border-kalvium-border dark:border-kalvium-dark-border shadow-soft-xs">
+            <span className="text-[10px] font-bold uppercase tracking-wider text-kalvium-muted block mb-0.5">
+              Effective Date
+            </span>
+            <p className="text-xs font-bold text-kalvium-text dark:text-kalvium-dark-text">October 2026</p>
           </div>
-
-          <div className="p-4 rounded-2xl bg-white dark:bg-kalvium-dark-surface border border-kalvium-border dark:border-kalvium-dark-border shadow-soft-xs flex items-start gap-3">
-            <div className="p-2 rounded-xl bg-kalvium-success-tint dark:bg-kalvium-dark-success-tint text-kalvium-success shrink-0">
-              <ShieldCheck size={18} />
-            </div>
-            <div>
-              <span className="text-[11px] font-bold text-kalvium-text dark:text-kalvium-dark-text block">
-                No Ad Tracking or Data Sales
-              </span>
-              <p className="text-[11px] text-kalvium-muted dark:text-kalvium-dark-muted mt-0.5">
-                We never sell, monetize, or share student engagement data with external advertisers.
-              </p>
-            </div>
+          <div className="p-3.5 rounded-2xl bg-white dark:bg-kalvium-dark-surface border border-kalvium-border dark:border-kalvium-dark-border shadow-soft-xs">
+            <span className="text-[10px] font-bold uppercase tracking-wider text-kalvium-muted block mb-0.5">
+              Commercial Policy
+            </span>
+            <span className="inline-flex items-center gap-1 text-xs font-bold text-kalvium-success">
+              <span className="w-1.5 h-1.5 rounded-full bg-kalvium-success animate-pulse" />
+              100% Non-Monetized
+            </span>
           </div>
+          <div className="p-3.5 rounded-2xl bg-white dark:bg-kalvium-dark-surface border border-kalvium-border dark:border-kalvium-dark-border shadow-soft-xs">
+            <span className="text-[10px] font-bold uppercase tracking-wider text-kalvium-muted block mb-0.5">
+              Cloud Infrastructure
+            </span>
+            <p className="text-xs font-bold text-kalvium-text dark:text-kalvium-dark-text">Firebase Security Rules</p>
+          </div>
+          <div className="p-3.5 rounded-2xl bg-white dark:bg-kalvium-dark-surface border border-kalvium-border dark:border-kalvium-dark-border shadow-soft-xs">
+            <span className="text-[10px] font-bold uppercase tracking-wider text-kalvium-muted block mb-0.5">
+              Ecosystem
+            </span>
+            <p className="text-xs font-bold text-kalvium-text dark:text-kalvium-dark-text">AIFT Squad 83</p>
+          </div>
+        </div>
 
-          <div className="p-4 rounded-2xl bg-white dark:bg-kalvium-dark-surface border border-kalvium-border dark:border-kalvium-dark-border shadow-soft-xs flex items-start gap-3">
-            <div className="p-2 rounded-xl bg-kalvium-warning-tint dark:bg-kalvium-dark-warning-tint text-kalvium-warning shrink-0">
-              <Lock size={18} />
-            </div>
-            <div>
-              <span className="text-[11px] font-bold text-kalvium-text dark:text-kalvium-dark-text block">
-                HMAC Signed Role Security
-              </span>
-              <p className="text-[11px] text-kalvium-muted dark:text-kalvium-dark-muted mt-0.5">
-                Cryptographic signatures protect administrative boundaries across edge middleware.
-              </p>
-            </div>
+        {/* Zero-Commercialization Pledge Banner */}
+        <div className="mt-4 p-4 rounded-2xl bg-emerald-50 dark:bg-emerald-950/30 border border-emerald-200 dark:border-emerald-800/40 flex items-start gap-3">
+          <HeartHandshake className="w-5 h-5 text-emerald-600 dark:text-emerald-400 shrink-0 mt-0.5" />
+          <div className="space-y-0.5">
+            <h4 className="text-xs font-bold text-emerald-800 dark:text-emerald-300">
+              Our Zero-Commercialization & Non-Monetization Pledge
+            </h4>
+            <p className="text-xs text-emerald-700/90 dark:text-emerald-400/90 leading-relaxed">
+              Student data is sacred. CampusHub never sells, rents, tracks, or shares student information with external advertisers, data brokers, or marketing networks. All data exists solely for academic coordination and squad progress.
+            </p>
           </div>
         </div>
       </div>
 
       {/* Main Two-Column Layout */}
       <div className="grid grid-cols-1 lg:grid-cols-[280px_1fr] gap-10 items-start">
-        {/* Table of Contents */}
+        {/* Sticky Sidebar */}
         <aside className="sticky top-20 hidden lg:block bg-white dark:bg-kalvium-dark-surface border border-kalvium-border dark:border-kalvium-dark-border rounded-2xl p-4 shadow-soft-xs">
           <p className="text-[11px] font-bold uppercase tracking-wider text-kalvium-muted dark:text-kalvium-dark-muted mb-3 px-2">
-            Policy Navigation
+            Table of Contents
           </p>
           <nav className="space-y-1">
             {SECTIONS.map((sec) => (
@@ -166,210 +162,240 @@ export default function PrivacyPolicyPage() {
               </a>
             ))}
           </nav>
+
+          <div className="mt-6 pt-4 border-t border-kalvium-border dark:border-kalvium-dark-border px-2">
+            <span className="text-[10px] font-bold text-kalvium-muted uppercase tracking-wider block mb-1">
+              Related Documents
+            </span>
+            <div className="space-y-1.5">
+              <Link
+                href="/terms"
+                className="text-xs text-kalvium-coral hover:underline flex items-center gap-1 font-semibold"
+              >
+                <span>Terms & Conditions</span>
+                <ChevronRight size={12} />
+              </Link>
+              <Link
+                href="/guidelines"
+                className="text-xs text-kalvium-coral hover:underline flex items-center gap-1 font-semibold"
+              >
+                <span>Event Hosting Guidelines</span>
+                <ChevronRight size={12} />
+              </Link>
+              <Link
+                href="/faq"
+                className="text-xs text-kalvium-coral hover:underline flex items-center gap-1 font-semibold"
+              >
+                <span>Help Center & FAQ</span>
+                <ChevronRight size={12} />
+              </Link>
+              <Link
+                href="/contact"
+                className="text-xs text-kalvium-coral hover:underline flex items-center gap-1 font-semibold"
+              >
+                <span>Contact Staff</span>
+                <ChevronRight size={12} />
+              </Link>
+            </div>
+          </div>
         </aside>
 
         {/* Content Body */}
         <div className="bg-white dark:bg-kalvium-dark-surface border border-kalvium-border dark:border-kalvium-dark-border rounded-3xl p-6 sm:p-10 shadow-kalvium-sm space-y-10 leading-relaxed text-xs sm:text-sm text-kalvium-text dark:text-kalvium-dark-text">
           {/* Section 1 */}
-          <section id="overview" className="scroll-mt-24 space-y-3">
-            <h2 className="text-lg sm:text-xl font-bold font-sans tracking-tight text-kalvium-ink dark:text-kalvium-dark-ink flex items-center gap-2">
-              <ShieldCheck className="w-5 h-5 text-kalvium-coral shrink-0" />
-              <span>1. Privacy Overview & Institutional Commitments</span>
-            </h2>
-            <p className="text-kalvium-muted dark:text-kalvium-dark-muted">
-              At Campus Event Hub, student privacy and institutional trust are fundamental. This policy explains what information we collect, how it is used to orchestrate campus events, and the technical measures implemented to ensure student agendas and administrative evaluations remain protected.
-            </p>
-            <p className="text-kalvium-muted dark:text-kalvium-dark-muted">
-              CampusHub is operated within the Kalvium academic infrastructure. We do not sell, rent, or lease personal information to third-party data brokers or marketing platforms under any circumstances.
-            </p>
-          </section>
+          <section id="information-collected" className="scroll-mt-24 space-y-4">
+            <div className="flex items-center gap-2.5 pb-2 border-b border-kalvium-border/70 dark:border-kalvium-dark-border/70">
+              <div className="w-8 h-8 rounded-xl bg-kalvium-coral-tint dark:bg-kalvium-dark-coral-tint text-kalvium-coral flex items-center justify-center font-bold">
+                <Database size={18} />
+              </div>
+              <h2 className="text-lg sm:text-xl font-bold font-sans tracking-tight text-kalvium-ink dark:text-kalvium-dark-ink">
+                1. Information Collected
+              </h2>
+            </div>
 
-          {/* Section 2 */}
-          <section id="information-collected" className="scroll-mt-24 space-y-3">
-            <h2 className="text-lg sm:text-xl font-bold font-sans tracking-tight text-kalvium-ink dark:text-kalvium-dark-ink flex items-center gap-2">
-              <Database className="w-5 h-5 text-kalvium-coral shrink-0" />
-              <span>2. Information We Collect</span>
-            </h2>
             <p className="text-kalvium-muted dark:text-kalvium-dark-muted">
-              We collect only the minimal data required to provide authenticated campus event management:
+              We collect only the essential academic data points required to power your campus event experience:
             </p>
+
             <div className="space-y-3">
-              <div className="p-3.5 rounded-xl bg-kalvium-surface-alt dark:bg-kalvium-dark-surface-alt border border-kalvium-border dark:border-kalvium-dark-border">
-                <strong className="text-kalvium-text dark:text-kalvium-dark-text block mb-1">
-                  A. Account & Profile Data
-                </strong>
-                <p className="text-kalvium-muted dark:text-kalvium-dark-muted text-xs">
-                  Your full name, verified institutional email address (<code className="font-mono text-[11px]">@kalvium.community</code> or <code className="font-mono text-[11px]">@kalvium.com</code>), user role, and default avatar identifier.
+              <div className="p-4 rounded-2xl bg-kalvium-surface-alt dark:bg-kalvium-dark-surface-alt border border-kalvium-border dark:border-kalvium-dark-border">
+                <h4 className="font-bold text-xs text-kalvium-text dark:text-kalvium-dark-text mb-1 flex items-center gap-1.5">
+                  <UserCheck size={14} className="text-kalvium-coral" />
+                  <span>Profile & Academic Identity</span>
+                </h4>
+                <p className="text-xs text-kalvium-muted dark:text-kalvium-dark-muted leading-relaxed">
+                  Your full name, official Kalvium email address (<code className="font-mono text-[11px]">@kalvium.community</code> or <code className="font-mono text-[11px]">@kalvium.com</code>), assigned AIFT squad number (e.g., Squad 83), and optional profile links you choose to share (such as your GitHub handle, personal portfolio, or technical skills).
                 </p>
               </div>
 
-              <div className="p-3.5 rounded-xl bg-kalvium-surface-alt dark:bg-kalvium-dark-surface-alt border border-kalvium-border dark:border-kalvium-dark-border">
-                <strong className="text-kalvium-text dark:text-kalvium-dark-text block mb-1">
-                  B. Personal Schedule & Agenda Bookmarks
-                </strong>
-                <p className="text-kalvium-muted dark:text-kalvium-dark-muted text-xs">
-                  The events you choose to save to "My Schedule" are stored in a private subcollection under your user document (<code className="font-mono text-[11px]">users/{"{userId}"}/savedEvents</code>). This data is readable only by your authenticated session.
+              <div className="p-4 rounded-2xl bg-kalvium-surface-alt dark:bg-kalvium-dark-surface-alt border border-kalvium-border dark:border-kalvium-dark-border">
+                <h4 className="font-bold text-xs text-kalvium-text dark:text-kalvium-dark-text mb-1 flex items-center gap-1.5">
+                  <CheckCircle2 size={14} className="text-kalvium-coral" />
+                  <span>Activity & Squad Engagement</span>
+                </h4>
+                <p className="text-xs text-kalvium-muted dark:text-kalvium-dark-muted leading-relaxed">
+                  Events you register for, hackathons participated in, squad project contributions, workshop submissions, calendar conflict checks, and platform interaction logs.
                 </p>
               </div>
 
-              <div className="p-3.5 rounded-xl bg-kalvium-surface-alt dark:bg-kalvium-dark-surface-alt border border-kalvium-border dark:border-kalvium-dark-border">
-                <strong className="text-kalvium-text dark:text-kalvium-dark-text block mb-1">
-                  C. Event Submissions & Verification Audit Records
-                </strong>
-                <p className="text-kalvium-muted dark:text-kalvium-dark-muted text-xs">
-                  Event titles, descriptions, categories, venues, dates, times, and promotional flyers submitted by organizers or students. For managerial decisions, we record manager timestamps and review notes in an immutable audit subcollection.
+              <div className="p-4 rounded-2xl bg-kalvium-surface-alt dark:bg-kalvium-dark-surface-alt border border-kalvium-border dark:border-kalvium-dark-border">
+                <h4 className="font-bold text-xs text-kalvium-text dark:text-kalvium-dark-text mb-1 flex items-center gap-1.5">
+                  <HardDrive size={14} className="text-kalvium-coral" />
+                  <span>Technical Metadata</span>
+                </h4>
+                <p className="text-xs text-kalvium-muted dark:text-kalvium-dark-muted leading-relaxed">
+                  Device and browser specifications, cryptographic session tokens for role verification, and performance telemetry to monitor uptime, prevent brute-force attacks, and protect platform endpoints.
                 </p>
               </div>
             </div>
           </section>
 
+          {/* Section 2 */}
+          <section id="how-information-used" className="scroll-mt-24 space-y-4">
+            <div className="flex items-center gap-2.5 pb-2 border-b border-kalvium-border/70 dark:border-kalvium-dark-border/70">
+              <div className="w-8 h-8 rounded-xl bg-kalvium-coral-tint dark:bg-kalvium-dark-coral-tint text-kalvium-coral flex items-center justify-center font-bold">
+                <FileCheck size={18} />
+              </div>
+              <h2 className="text-lg sm:text-xl font-bold font-sans tracking-tight text-kalvium-ink dark:text-kalvium-dark-ink">
+                2. How Information Is Used
+              </h2>
+            </div>
+
+            <p className="text-kalvium-muted dark:text-kalvium-dark-muted">
+              Every piece of collected information directly serves your academic workflow:
+            </p>
+
+            <ul className="space-y-2.5 pl-2">
+              <li className="flex items-start gap-2.5">
+                <span className="w-1.5 h-1.5 rounded-full bg-kalvium-coral mt-2 shrink-0" />
+                <span className="text-xs text-kalvium-muted dark:text-kalvium-dark-muted leading-relaxed">
+                  <strong className="text-kalvium-text dark:text-kalvium-dark-text">Role-Based Access:</strong> Authenticating student and mentor identities, granting role-based permissions (Student Portal, Organizer Studio, Campus Manager Verification).
+                </span>
+              </li>
+              <li className="flex items-start gap-2.5">
+                <span className="w-1.5 h-1.5 rounded-full bg-kalvium-coral mt-2 shrink-0" />
+                <span className="text-xs text-kalvium-muted dark:text-kalvium-dark-muted leading-relaxed">
+                  <strong className="text-kalvium-text dark:text-kalvium-dark-text">Event Notifications & Reminders:</strong> Dispatching timely alerts regarding registered campus hackathons, sprint milestones, venue shifts, and cohort-wide announcements.
+                </span>
+              </li>
+              <li className="flex items-start gap-2.5">
+                <span className="w-1.5 h-1.5 rounded-full bg-kalvium-coral mt-2 shrink-0" />
+                <span className="text-xs text-kalvium-muted dark:text-kalvium-dark-muted leading-relaxed">
+                  <strong className="text-kalvium-text dark:text-kalvium-dark-text">Collaboration & Showcases:</strong> Facilitating squad collaboration, showcasing technical projects across the AIFT community, and diagnosing internal system errors.
+                </span>
+              </li>
+            </ul>
+          </section>
+
           {/* Section 3 */}
-          <section id="api-key-zero-storage" className="scroll-mt-24 space-y-3">
-            <h2 className="text-lg sm:text-xl font-bold font-sans tracking-tight text-kalvium-ink dark:text-kalvium-dark-ink flex items-center gap-2">
-              <Key className="w-5 h-5 text-kalvium-coral shrink-0" />
-              <span>3. Strict Zero-Storage Policy for Gemini API Keys</span>
-            </h2>
-            <div className="p-4 rounded-2xl bg-kalvium-coral-tint dark:bg-kalvium-dark-coral-tint border border-kalvium-coral/30">
-              <p className="font-bold text-kalvium-coral text-xs mb-1">
-                Zero Cloud Persistence Architecture
-              </p>
-              <p className="text-xs text-kalvium-muted dark:text-kalvium-dark-muted leading-relaxed">
-                When an organizer or student enters a Google Gemini API key to run multimodal flyer extraction, the key is saved exclusively in the client browser's <code className="font-mono text-[11px]">localStorage</code> on that specific physical device.
-                <br /><br />
-                The backend route handlers explicitly sanitize all event snapshots before writing to Firestore, stripping out any <code className="font-mono text-[11px]">apiKey</code> or <code className="font-mono text-[11px]">geminiKey</code> parameters. CampusHub servers never store your API key in persistent cloud databases.
-              </p>
+          <section id="data-sharing-security" className="scroll-mt-24 space-y-4">
+            <div className="flex items-center gap-2.5 pb-2 border-b border-kalvium-border/70 dark:border-kalvium-dark-border/70">
+              <div className="w-8 h-8 rounded-xl bg-kalvium-coral-tint dark:bg-kalvium-dark-coral-tint text-kalvium-coral flex items-center justify-center font-bold">
+                <Lock size={18} />
+              </div>
+              <h2 className="text-lg sm:text-xl font-bold font-sans tracking-tight text-kalvium-ink dark:text-kalvium-dark-ink">
+                3. Data Sharing & Platform Security
+              </h2>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div className="p-4 rounded-2xl bg-kalvium-surface-alt dark:bg-kalvium-dark-surface-alt border border-kalvium-border dark:border-kalvium-dark-border space-y-1">
+                <span className="font-bold text-xs text-kalvium-text dark:text-kalvium-dark-text flex items-center gap-1.5">
+                  <ShieldCheck size={14} className="text-kalvium-coral" />
+                  <span>Strict Community Boundary</span>
+                </span>
+                <p className="text-xs text-kalvium-muted dark:text-kalvium-dark-muted leading-relaxed">
+                  Access to squad deliverables and personal profiles is restricted strictly to verified members within the Kalvium AIFT community.
+                </p>
+              </div>
+
+              <div className="p-4 rounded-2xl bg-kalvium-surface-alt dark:bg-kalvium-dark-surface-alt border border-kalvium-border dark:border-kalvium-dark-border space-y-1">
+                <span className="font-bold text-xs text-kalvium-text dark:text-kalvium-dark-text flex items-center gap-1.5">
+                  <Server size={14} className="text-kalvium-coral" />
+                  <span>Encrypted Cloud Storage</span>
+                </span>
+                <p className="text-xs text-kalvium-muted dark:text-kalvium-dark-muted leading-relaxed">
+                  All application records and authentication states are securely hosted on Google Cloud Firebase with industry-standard TLS encryption at rest and in transit.
+                </p>
+              </div>
             </div>
           </section>
 
           {/* Section 4 */}
-          <section id="cookies-sessions" className="scroll-mt-24 space-y-3">
-            <h2 className="text-lg sm:text-xl font-bold font-sans tracking-tight text-kalvium-ink dark:text-kalvium-dark-ink flex items-center gap-2">
-              <Lock className="w-5 h-5 text-kalvium-coral shrink-0" />
-              <span>4. Session Cookies & Edge Middleware Security</span>
-            </h2>
-            <p className="text-kalvium-muted dark:text-kalvium-dark-muted">
-              We employ secure, modern HTTP cookie standards for user authentication:
+          <section id="zero-storage-keys" className="scroll-mt-24 space-y-4">
+            <div className="flex items-center gap-2.5 pb-2 border-b border-kalvium-border/70 dark:border-kalvium-dark-border/70">
+              <div className="w-8 h-8 rounded-xl bg-kalvium-coral-tint dark:bg-kalvium-dark-coral-tint text-kalvium-coral flex items-center justify-center font-bold">
+                <Key size={18} />
+              </div>
+              <h2 className="text-lg sm:text-xl font-bold font-sans tracking-tight text-kalvium-ink dark:text-kalvium-dark-ink">
+                4. Zero-Storage Policy for Gemini API Keys
+              </h2>
+            </div>
+
+            <p className="text-kalvium-muted dark:text-kalvium-dark-muted leading-relaxed">
+              When organizers utilize the AI Multimodal Poster Studio, they have the option to provide a personal Google Gemini API Key. To ensure absolute confidentiality:
             </p>
-            <ul className="list-disc pl-5 space-y-2 text-kalvium-muted dark:text-kalvium-dark-muted">
-              <li>
-                <strong className="text-kalvium-text dark:text-kalvium-dark-text">HTTP-Only Tokens:</strong> The primary session token (<code className="font-mono text-[11px]">campus_auth_token</code>) is configured with <code className="font-mono text-[11px]">HttpOnly: true</code> and <code className="font-mono text-[11px]">SameSite: Lax</code> to prevent client-side script interception (XSS).
-              </li>
-              <li>
-                <strong className="text-kalvium-text dark:text-kalvium-dark-text">HMAC-SHA256 Role Signatures:</strong> Privileged administrative access (<code className="font-mono text-[11px]">CAMPUS_MANAGER</code>, <code className="font-mono text-[11px]">ORGANIZER</code>) requires an accompanying cryptographic signature cookie (<code className="font-mono text-[11px]">campus_user_role_sig</code>) evaluated at the edge by Next.js middleware.
-              </li>
-              <li>
-                <strong className="text-kalvium-text dark:text-kalvium-dark-text">Zero Advertising Cookies:</strong> CampusHub does not use third-party marketing cookies, tracking pixels, or cross-site tracking beacons.
-              </li>
-            </ul>
+
+            <div className="p-4 rounded-2xl bg-kalvium-coral-tint/40 dark:bg-kalvium-dark-coral-tint/30 border border-kalvium-coral/30 space-y-2">
+              <div className="flex items-center gap-2 text-xs font-bold text-kalvium-coral">
+                <Lock size={15} />
+                <span>Client-Side On-Device Isolation</span>
+              </div>
+              <p className="text-xs text-kalvium-muted dark:text-kalvium-dark-muted leading-relaxed">
+                Your Gemini API key is stored exclusively on your own browser device using client-side <code className="font-mono text-[11px] bg-white dark:bg-kalvium-dark-surface px-1 rounded">localStorage</code>. It is NEVER transmitted to our backend servers, NEVER written to Firebase Firestore, and NEVER logged. Optical vision requests are routed directly from your browser to Google API endpoints.
+              </p>
+            </div>
           </section>
 
           {/* Section 5 */}
-          <section id="media-storage" className="scroll-mt-24 space-y-3">
-            <h2 className="text-lg sm:text-xl font-bold font-sans tracking-tight text-kalvium-ink dark:text-kalvium-dark-ink flex items-center gap-2">
-              <HardDrive className="w-5 h-5 text-kalvium-coral shrink-0" />
-              <span>5. Poster Media & Cloud Storage</span>
-            </h2>
-            <p className="text-kalvium-muted dark:text-kalvium-dark-muted">
-              Promotional flyer images uploaded by organizers are stored in secure Firebase Cloud Storage buckets:
-            </p>
-            <ul className="list-disc pl-5 space-y-1.5 text-kalvium-muted dark:text-kalvium-dark-muted">
-              <li>Uploads are capped at a maximum of 10MB per file and restricted to approved image MIME types (<code className="font-mono text-[11px]">image/png</code>, <code className="font-mono text-[11px]">image/jpeg</code>, <code className="font-mono text-[11px]">image/webp</code>).</li>
-              <li>Storage security rules prohibit executable scripts or non-image payloads.</li>
-              <li>Published posters are made publicly readable within the campus application to facilitate event discovery.</li>
-            </ul>
-          </section>
-
-          {/* Section 6 */}
-          <section id="third-parties" className="scroll-mt-24 space-y-3">
-            <h2 className="text-lg sm:text-xl font-bold font-sans tracking-tight text-kalvium-ink dark:text-kalvium-dark-ink flex items-center gap-2">
-              <Server className="w-5 h-5 text-kalvium-coral shrink-0" />
-              <span>6. Infrastructure Providers & Third Parties</span>
-            </h2>
-            <p className="text-kalvium-muted dark:text-kalvium-dark-muted">
-              CampusHub relies on industry-standard cloud infrastructure:
-            </p>
-            <ul className="list-disc pl-5 space-y-1.5 text-kalvium-muted dark:text-kalvium-dark-muted">
-              <li><strong>Google Firebase:</strong> Used for authenticated identity, NoSQL Firestore database, and media bucket storage.</li>
-              <li><strong>Google Gemini API:</strong> Processes uploaded flyer images for optical character extraction when initiated by an organizer.</li>
-              <li><strong>Vercel / Next.js Hosting:</strong> Serves the web application and executes serverless API route handlers.</li>
-            </ul>
-          </section>
-
-          {/* Section 7 */}
-          <section id="student-rights" className="scroll-mt-24 space-y-3">
-            <h2 className="text-lg sm:text-xl font-bold font-sans tracking-tight text-kalvium-ink dark:text-kalvium-dark-ink flex items-center gap-2">
-              <UserCheck className="w-5 h-5 text-kalvium-coral shrink-0" />
-              <span>7. Your Rights & Data Portability</span>
-            </h2>
-            <p className="text-kalvium-muted dark:text-kalvium-dark-muted">
-              As a campus member, you maintain full control over your personal data:
-            </p>
-            <ul className="list-disc pl-5 space-y-1.5 text-kalvium-muted dark:text-kalvium-dark-muted">
-              <li><strong>Agenda Control:</strong> You can add or remove any saved event from your personal calendar with a single click.</li>
-              <li><strong>Submission Withdrawal:</strong> Student and club organizers may delete their pending event proposals at any time prior to or following review.</li>
-              <li><strong>Account Deletion:</strong> You may request complete account and data removal by contacting campus administrative IT.</li>
-            </ul>
-          </section>
-
-          {/* Section 8 */}
-          <section id="retention" className="scroll-mt-24 space-y-3">
-            <h2 className="text-lg sm:text-xl font-bold font-sans tracking-tight text-kalvium-ink dark:text-kalvium-dark-ink flex items-center gap-2">
-              <Clock className="w-5 h-5 text-kalvium-coral shrink-0" />
-              <span>8. Data Retention & Academic Archiving</span>
-            </h2>
-            <p className="text-kalvium-muted dark:text-kalvium-dark-muted">
-              Verified campus events remain archived in the platform to preserve university co-curricular history and prevent duplicate scheduling in subsequent academic years. Inactive student accounts may be archived following graduation.
-            </p>
-          </section>
-
-          {/* Section 9 */}
-          <section id="contact" className="scroll-mt-24 space-y-3">
-            <h2 className="text-lg sm:text-xl font-bold font-sans tracking-tight text-kalvium-ink dark:text-kalvium-dark-ink flex items-center gap-2">
-              <AlertCircle className="w-5 h-5 text-kalvium-coral shrink-0" />
-              <span>9. Data Protection Contact & Inquiries</span>
-            </h2>
-            <p className="text-kalvium-muted dark:text-kalvium-dark-muted">
-              If you have questions regarding this Privacy Policy or wish to exercise your data rights, please contact our Campus Data Protection Coordinator:
-            </p>
-            <div className="p-4 rounded-2xl bg-kalvium-surface-alt dark:bg-kalvium-dark-surface-alt border border-kalvium-border dark:border-kalvium-dark-border">
-              <p className="font-bold text-xs text-kalvium-text dark:text-kalvium-dark-text">
-                Kalvium Campus Hub Privacy & Safety Team
-              </p>
-              <p className="text-xs text-kalvium-muted dark:text-kalvium-dark-muted mt-1">
-                Email:{" "}
-                <a
-                  href="mailto:privacy@kalvium.community"
-                  className="text-kalvium-coral font-bold hover:underline"
-                >
-                  privacy@kalvium.community
-                </a>
-              </p>
-              <p className="text-xs text-kalvium-muted dark:text-kalvium-dark-muted mt-0.5">
-                Campus Location: Student Affairs Center, Kalvium Campus
-              </p>
+          <section id="student-rights" className="scroll-mt-24 space-y-4">
+            <div className="flex items-center gap-2.5 pb-2 border-b border-kalvium-border/70 dark:border-kalvium-dark-border/70">
+              <div className="w-8 h-8 rounded-xl bg-kalvium-coral-tint dark:bg-kalvium-dark-coral-tint text-kalvium-coral flex items-center justify-center font-bold">
+                <UserCheck size={18} />
+              </div>
+              <h2 className="text-lg sm:text-xl font-bold font-sans tracking-tight text-kalvium-ink dark:text-kalvium-dark-ink">
+                5. Student Rights & Data Requests
+              </h2>
             </div>
-          </section>
 
-          {/* Bottom Action Footer */}
-          <div className="pt-6 border-t border-kalvium-border dark:border-kalvium-dark-border flex flex-col sm:flex-row items-center justify-between gap-4">
-            <div className="flex items-center gap-2">
-              <CampusVerifiedBadge size="sm" />
-              <span className="text-xs font-semibold text-kalvium-muted">
-                Zero-Persistence API Key Security Guaranteed
-              </span>
-            </div>
-            <div className="flex items-center gap-3">
+            <p className="text-kalvium-muted dark:text-kalvium-dark-muted leading-relaxed">
+              You maintain full control over your academic data. You can review and update your profile details at any time through your Profile Settings. If you wish to request a complete account deletion, data export, or audit record removal, contact our development leads.
+            </p>
+
+            <div className="p-4 rounded-2xl bg-kalvium-surface-alt dark:bg-kalvium-dark-surface-alt border border-kalvium-border dark:border-kalvium-dark-border flex items-center justify-between gap-4">
+              <div>
+                <p className="text-xs font-bold text-kalvium-text dark:text-kalvium-dark-text">
+                  Data Protection & Privacy Contact
+                </p>
+                <p className="text-xs text-kalvium-muted dark:text-kalvium-dark-muted">
+                  Squad 83 Student Development Leads
+                </p>
+              </div>
               <Link
-                href="/terms"
-                className="text-xs font-semibold text-kalvium-muted hover:text-kalvium-coral transition"
+                href="/contact"
+                className="px-4 py-2 rounded-xl bg-kalvium-coral text-white font-semibold text-xs hover:bg-kalvium-coral-dark transition shadow-soft-xs shrink-0"
               >
-                ← Terms & Conditions
+                Contact Staff
               </Link>
+            </div>
+          </section>
+
+          {/* Bottom Card */}
+          <div className="pt-6 border-t border-kalvium-border dark:border-kalvium-dark-border">
+            <div className="p-5 rounded-2xl bg-kalvium-surface-alt dark:bg-kalvium-dark-surface-alt border border-kalvium-border dark:border-kalvium-dark-border flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+              <div>
+                <p className="text-xs font-bold text-kalvium-text dark:text-kalvium-dark-text">
+                  Reviewed our Privacy Policy?
+                </p>
+                <p className="text-xs text-kalvium-muted dark:text-kalvium-dark-muted mt-0.5">
+                  Check out the Event Hosting Guidelines to learn how events are verified.
+                </p>
+              </div>
               <Link
                 href="/guidelines"
-                className="text-xs font-bold text-kalvium-coral hover:underline"
+                className="px-4 py-2 rounded-xl border border-kalvium-border dark:border-kalvium-dark-border bg-white dark:bg-kalvium-dark-surface text-xs font-semibold text-kalvium-text dark:text-kalvium-dark-text hover:border-kalvium-coral transition shrink-0"
               >
-                Event Guidelines →
+                Event Guidelines
               </Link>
             </div>
           </div>

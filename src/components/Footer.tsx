@@ -207,13 +207,13 @@ export default function Footer() {
                 </Link>
               </li>
               <li>
-                <a
-                  href="mailto:campus-hub@kalvium.community"
-                  className="hover:text-kalvium-coral transition inline-flex items-center gap-1 text-kalvium-coral"
+                <Link
+                  href="/contact"
+                  className="hover:text-kalvium-coral transition inline-flex items-center gap-1.5 text-kalvium-coral font-medium"
                 >
                   <Mail size={12} />
                   <span>Contact Staff</span>
-                </a>
+                </Link>
               </li>
             </ul>
           </div>
@@ -249,6 +249,10 @@ export default function Footer() {
             <span>•</span>
             <Link href="/faq" className="hover:text-kalvium-coral transition">
               FAQ
+            </Link>
+            <span>•</span>
+            <Link href="/contact" className="hover:text-kalvium-coral transition">
+              Contact
             </Link>
           </div>
         </div>
