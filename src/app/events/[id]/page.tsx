@@ -21,12 +21,15 @@ import {
   CheckCircle2,
   Trash2,
   AlertTriangle,
+  Award,
 } from "lucide-react";
 import CampusVerifiedBadge from "@/components/CampusVerifiedBadge";
 import dynamic from "next/dynamic";
 const ClashWarningModal = dynamic(() => import("@/components/ClashWarningModal"), { ssr: false });
 const EventAttendeesModal = dynamic(() => import("@/components/EventAttendeesModal"), { ssr: false });
 const RequestDeleteModal = dynamic(() => import("@/components/RequestDeleteModal"), { ssr: false });
+const UploadCertificateModal = dynamic(() => import("@/components/UploadCertificateModal"), { ssr: false });
+const EventHallOfFame = dynamic(() => import("@/components/EventHallOfFame"), { ssr: false });
 import MagneticButton from "@/components/MagneticButton";
 import { useAuth } from "@/context/AuthContext";
 import { useToast } from "@/components/Toast";
@@ -59,6 +62,10 @@ export default function EventDetailPage() {
   const [confirmDelete, setConfirmDelete] = useState(false);
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
   const [deleting, setDeleting] = useState(false);
+
+  // Certificate & Hall of Fame states (Part 2)
+  const [certModalOpen, setCertModalOpen] = useState(false);
+  const [refreshHallOfFame, setRefreshHallOfFame] = useState(0);
 
   const [clashModalOpen, setClashModalOpen] = useState(false);
   const [clashData, setClashData] = useState<any>(null);
@@ -469,6 +476,16 @@ export default function EventDetailPage() {
                     </>
                   )}
                 </button>
+
+                <button
+                  type="button"
+                  onClick={() => setCertModalOpen(true)}
+                  className="rounded-full px-5 py-3 text-xs font-semibold flex items-center gap-2 transition active:scale-95 border border-kalvium-coral/30 bg-kalvium-coral/10 hover:bg-kalvium-coral text-kalvium-coral hover:text-white"
+                  title="Upload Certificate of Participation or Award"
+                >
+                  <Award size={15} />
+                  <span>Upload Certificate</span>
+                </button>
               </>
             )}
           </div>
@@ -566,6 +583,17 @@ export default function EventDetailPage() {
               )}
           </div>
         </div>
+
+        {/* Hall of Fame & Participants Showcase (Part 2) */}
+        <div className="bg-white dark:bg-kalvium-dark-surface rounded-3xl p-6 sm:p-8 border border-kalvium-border dark:border-kalvium-dark-border shadow-kalvium-sm">
+          <EventHallOfFame
+            eventId={event.id}
+            eventTitle={event.title}
+            canUpload={Boolean(user)}
+            onOpenUploadModal={() => setCertModalOpen(true)}
+            refreshTrigger={refreshHallOfFame}
+          />
+        </div>
       </motion.div>
 
       {/* Clash Warning Dialog */}
@@ -607,6 +635,22 @@ export default function EventDetailPage() {
           eventVenue={event.venue}
           onSuccess={() => {
             fetchEvent();
+          }}
+        />
+      )}
+
+      {/* Upload Certificate & Achievements Modal (Part 2) */}
+      {event && (
+        <UploadCertificateModal
+          isOpen={certModalOpen}
+          onClose={() => setCertModalOpen(false)}
+          eventId={event.id}
+          eventTitle={event.title}
+          eventDate={event.date}
+          eventVenue={event.venue}
+          onSuccess={() => {
+            setRefreshHallOfFame((prev) => prev + 1);
+            fetchEnrollmentStatus(event.id);
           }}
         />
       )}

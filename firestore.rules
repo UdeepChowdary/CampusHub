@@ -31,6 +31,11 @@ service cloud.firestore {
       match /enrolledEvents/{eventId} {
         allow read, write: if isAuthenticated() && request.auth.uid == userId;
       }
+
+      // Participations & Certificates Subcollection
+      match /participations/{eventId} {
+        allow read, write: if isAuthenticated() && request.auth.uid == userId;
+      }
     }
 
     // Events Collection

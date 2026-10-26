@@ -19,12 +19,15 @@ import {
   Users,
   Trash2,
   AlertTriangle,
+  Award,
 } from "lucide-react";
 import CampusVerifiedBadge from "./CampusVerifiedBadge";
 import dynamic from "next/dynamic";
 const ClashWarningModal = dynamic(() => import("./ClashWarningModal"), { ssr: false });
 const EventAttendeesModal = dynamic(() => import("./EventAttendeesModal"), { ssr: false });
 const RequestDeleteModal = dynamic(() => import("./RequestDeleteModal"), { ssr: false });
+const UploadCertificateModal = dynamic(() => import("./UploadCertificateModal"), { ssr: false });
+const EventHallOfFame = dynamic(() => import("./EventHallOfFame"), { ssr: false });
 import { useAuth } from "@/context/AuthContext";
 import { useToast } from "@/components/Toast";
 import { useRouter } from "next/navigation";
@@ -62,6 +65,11 @@ export default function EventDetailDrawer({
   const [requestDeleteModalOpen, setRequestDeleteModalOpen] = useState(false);
   const [deleting, setDeleting] = useState(false);
 
+  // Certificate & Hall of Fame states (Part 2)
+  const [certModalOpen, setCertModalOpen] = useState(false);
+  const [refreshHallOfFame, setRefreshHallOfFame] = useState(0);
+  const [userParticipation, setUserParticipation] = useState<any>(null);
+
   const [clashModalOpen, setClashModalOpen] = useState(false);
   const [clashData, setClashData] = useState<any>(null);
 
@@ -80,25 +88,69 @@ export default function EventDetailDrawer({
     }
   };
 
+  const fetchUserParticipation = async (eventId: string) => {
+    if (!user) {
+      setUserParticipation(null);
+      return;
+    }
+    try {
+      const res = await fetch(`/api/events/${eventId}/participation`, { cache: "no-store" });
+      if (res.ok) {
+        const data = await res.json();
+        if (data.hasSubmitted && data.participation) {
+          setUserParticipation(data.participation);
+        } else {
+          setUserParticipation(null);
+        }
+      }
+    } catch {
+      setUserParticipation(null);
+    }
+  };
+
+  const handleOpenCertModal = () => {
+    if (!user) {
+      router.push(`/login?redirect=/events/${event?.id || ""}`);
+      onClose();
+      return;
+    }
+    setCertModalOpen(true);
+  };
+
   useEffect(() => {
     if (event) {
       setIsSaved(Boolean(event.isSaved));
       setIsEnrolled(Boolean(event.isEnrolled));
       setEnrolledCount(typeof event.enrolledCount === "number" ? event.enrolledCount : 0);
       fetchEnrollmentStatus(event.id);
+      fetchUserParticipation(event.id);
     }
-  }, [event]);
+  }, [event, user]);
 
-  // Close drawer on Escape key
+  // Close child modals or drawer on Escape key
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === "Escape" && isOpen && !clashModalOpen) {
-        onClose();
+      if (e.key === "Escape" && isOpen) {
+        if (certModalOpen) {
+          setCertModalOpen(false);
+          return;
+        }
+        if (attendeesModalOpen) {
+          setAttendeesModalOpen(false);
+          return;
+        }
+        if (requestDeleteModalOpen) {
+          setRequestDeleteModalOpen(false);
+          return;
+        }
+        if (!clashModalOpen) {
+          onClose();
+        }
       }
     };
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [isOpen, clashModalOpen, onClose]);
+  }, [isOpen, certModalOpen, attendeesModalOpen, requestDeleteModalOpen, clashModalOpen, onClose]);
 
   // Lock body scroll when drawer is open to prevent background scroll interference
   useEffect(() => {
@@ -382,6 +434,60 @@ export default function EventDetailDrawer({
               </div>
             </div>
 
+            {/* Certificate & Awards Quick Action Banner / Verified Card (Part 2) */}
+            {userParticipation ? (
+              <div className="p-4 rounded-2xl bg-gradient-to-r from-emerald-500/10 via-kalvium-success/10 to-emerald-500/5 border border-emerald-500/30 shadow-soft-xs space-y-3">
+                <div className="flex items-start justify-between gap-3">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-xl bg-kalvium-success text-white flex items-center justify-center shrink-0 shadow-sm">
+                      <ShieldCheck size={20} />
+                    </div>
+                    <div>
+                      <div className="flex items-center gap-2">
+                        <h4 className="text-xs font-bold text-kalvium-text dark:text-kalvium-dark-text">
+                          ✓ Certificate &amp; Credentials on File
+                        </h4>
+                        <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-kalvium-success/20 text-kalvium-success uppercase tracking-wider">
+                          Verified
+                        </span>
+                      </div>
+                      <p className="text-[11px] text-kalvium-muted mt-0.5">
+                        {userParticipation.hasWonPrize
+                          ? `🏆 ${userParticipation.awardTitle || "Prize Winner"}`
+                          : `Verified ${userParticipation.certificateType || "Participation"} Certificate`}
+                        {userParticipation.teamName ? ` • Team: ${userParticipation.teamName}` : ""}
+                      </p>
+                    </div>
+                  </div>
+
+                  <button
+                    type="button"
+                    onClick={handleOpenCertModal}
+                    className="px-3.5 py-1.5 rounded-full text-xs font-bold bg-white dark:bg-kalvium-dark-surface text-kalvium-text dark:text-kalvium-dark-text border border-kalvium-border hover:border-kalvium-coral hover:text-kalvium-coral transition active:scale-95 shadow-xs shrink-0"
+                  >
+                    Edit / Update
+                  </button>
+                </div>
+
+                {userParticipation.certificateUrl && (
+                  <div className="flex items-center justify-between pt-2 border-t border-emerald-500/20 text-xs">
+                    <span className="text-[11px] text-kalvium-muted truncate">
+                      Document verified in student campus portfolio
+                    </span>
+                    <a
+                      href={userParticipation.certificateUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-1 text-[11px] font-bold text-kalvium-coral hover:underline shrink-0"
+                    >
+                      <span>View Certificate</span>
+                      <ExternalLink size={12} />
+                    </a>
+                  </div>
+                )}
+              </div>
+            ) : null}
+
 
             {/* Secondary Registration Link if available */}
             {event.registrationUrl &&
@@ -449,6 +555,18 @@ export default function EventDetailDrawer({
               </div>
             )}
 
+            {/* Hall of Fame & Participants Showcase (Part 2) */}
+            <div className="pt-2">
+              <EventHallOfFame
+                eventId={event.id}
+                eventTitle={event.title}
+                canUpload={Boolean(user)}
+                onOpenUploadModal={handleOpenCertModal}
+                refreshTrigger={refreshHallOfFame}
+                compact={true}
+              />
+            </div>
+
             {/* Deep link fallback */}
             <div className="pt-4 border-t border-kalvium-border dark:border-kalvium-dark-border text-center">
               <Link
@@ -505,6 +623,14 @@ export default function EventDetailDrawer({
                   <span>Delete Event (Manager Action)</span>
                 </button>
               )}
+              <button
+                type="button"
+                onClick={handleOpenCertModal}
+                className="w-full py-2.5 px-5 rounded-full text-xs font-bold flex items-center justify-center gap-2 border border-kalvium-coral/30 bg-kalvium-coral/10 hover:bg-kalvium-coral text-kalvium-coral hover:text-white transition active:scale-[0.98]"
+              >
+                <Award className="w-3.5 h-3.5" />
+                <span>{userParticipation ? "Edit Certificate / Record" : "Upload Certificate / Record"}</span>
+              </button>
             </div>
           ) : isOrganizer ? (
             <div className="shrink-0 sticky bottom-0 bg-white/95 dark:bg-kalvium-dark-surface/95 backdrop-blur-md px-6 py-4 border-t border-kalvium-border dark:border-kalvium-dark-border z-30 space-y-2">
@@ -543,65 +669,78 @@ export default function EventDetailDrawer({
             </div>
           ) : (
             <div className="shrink-0 sticky bottom-0 bg-white/95 dark:bg-kalvium-dark-surface/95 backdrop-blur-md px-6 py-4 border-t border-kalvium-border dark:border-kalvium-dark-border z-30 space-y-2">
-              {/* Primary: Apply / Enrolled */}
-              <button
-                onClick={handleApplyClick}
-                disabled={enrolling || isPast}
-                className={`w-full py-3.5 px-5 rounded-full text-sm font-bold flex items-center justify-center gap-2 transition-all duration-200 active:scale-[0.98] shadow-soft-xs disabled:opacity-60 disabled:cursor-not-allowed ${
-                  isEnrolled
-                    ? "bg-kalvium-success-tint dark:bg-kalvium-dark-success-tint text-kalvium-success border border-kalvium-success/40 hover:bg-kalvium-success hover:text-white"
-                    : isPast
-                    ? "bg-kalvium-surface-alt dark:bg-kalvium-dark-surface-alt text-kalvium-muted border border-kalvium-border"
-                    : "bg-kalvium-coral hover:bg-kalvium-coral-hover text-white shadow-md shadow-kalvium-coral/25"
-                }`}
-              >
-                {enrolling ? (
-                  <>
-                    <span className="w-4 h-4 rounded-full border-2 border-current border-t-transparent animate-spin shrink-0" />
-                    <span>Processing Application…</span>
-                  </>
-                ) : isPast ? (
-                  <span>Event Concluded</span>
-                ) : isEnrolled ? (
-                  <>
-                    <CheckCircle2 className="w-4 h-4" />
-                    <span>✓ Enrolled • Click to Withdraw Application</span>
-                  </>
-                ) : (
-                  <>
-                    <Users className="w-4 h-4" />
-                    <span>Apply / Enroll for this Event</span>
-                  </>
-                )}
-              </button>
+              {isPast ? (
+                /* Concluded Event: Single primary action to upload or edit certificate */
+                <button
+                  type="button"
+                  onClick={handleOpenCertModal}
+                  className="w-full py-3.5 px-5 rounded-full text-sm font-bold flex items-center justify-center gap-2 bg-kalvium-coral hover:bg-kalvium-coral-hover text-white shadow-md shadow-kalvium-coral/25 transition-all duration-200 active:scale-[0.98]"
+                >
+                  <Award className="w-4 h-4" />
+                  <span>
+                    {userParticipation
+                      ? "✓ Certificate Uploaded • Edit Details"
+                      : "Upload Event Certificate & Achievements"}
+                  </span>
+                </button>
+              ) : (
+                /* Upcoming Event: Apply / Enroll and Save to Schedule */
+                <>
+                  <button
+                    onClick={handleApplyClick}
+                    disabled={enrolling}
+                    className={`w-full py-3.5 px-5 rounded-full text-sm font-bold flex items-center justify-center gap-2 transition-all duration-200 active:scale-[0.98] shadow-soft-xs disabled:opacity-60 disabled:cursor-not-allowed ${
+                      isEnrolled
+                        ? "bg-kalvium-success-tint dark:bg-kalvium-dark-success-tint text-kalvium-success border border-kalvium-success/40 hover:bg-kalvium-success hover:text-white"
+                        : "bg-kalvium-coral hover:bg-kalvium-coral-hover text-white shadow-md shadow-kalvium-coral/25"
+                    }`}
+                  >
+                    {enrolling ? (
+                      <>
+                        <span className="w-4 h-4 rounded-full border-2 border-current border-t-transparent animate-spin shrink-0" />
+                        <span>Processing Application…</span>
+                      </>
+                    ) : isEnrolled ? (
+                      <>
+                        <CheckCircle2 className="w-4 h-4" />
+                        <span>✓ Enrolled • Click to Withdraw Application</span>
+                      </>
+                    ) : (
+                      <>
+                        <Users className="w-4 h-4" />
+                        <span>Apply / Enroll for this Event</span>
+                      </>
+                    )}
+                  </button>
 
-              {/* Secondary: Save to Schedule */}
-              <button
-                onClick={handleSaveClick}
-                disabled={saving}
-                className={`w-full py-2.5 px-5 rounded-full text-xs font-semibold flex items-center justify-center gap-2 transition-all duration-200 active:scale-[0.98] border ${
-                  isSaved
-                    ? "bg-kalvium-surface-alt dark:bg-kalvium-dark-surface-alt text-kalvium-coral border-kalvium-coral/30 hover:bg-kalvium-coral-tint"
-                    : "bg-white dark:bg-kalvium-dark-surface text-kalvium-text dark:text-kalvium-dark-text border-kalvium-border dark:border-kalvium-dark-border hover:border-kalvium-coral"
-                }`}
-              >
-                {saving ? (
-                  <>
-                    <span className="w-3.5 h-3.5 rounded-full border-2 border-current border-t-transparent animate-spin shrink-0" />
-                    <span>Saving…</span>
-                  </>
-                ) : isSaved ? (
-                  <>
-                    <BookmarkCheck className="w-3.5 h-3.5 fill-kalvium-coral text-kalvium-coral" />
-                    <span>Saved to My Schedule</span>
-                  </>
-                ) : (
-                  <>
-                    <Bookmark className="w-3.5 h-3.5" />
-                    <span>Save to My Schedule</span>
-                  </>
-                )}
-              </button>
+                  <button
+                    onClick={handleSaveClick}
+                    disabled={saving}
+                    className={`w-full py-2.5 px-5 rounded-full text-xs font-semibold flex items-center justify-center gap-2 transition-all duration-200 active:scale-[0.98] border ${
+                      isSaved
+                        ? "bg-kalvium-surface-alt dark:bg-kalvium-dark-surface-alt text-kalvium-coral border-kalvium-coral/30 hover:bg-kalvium-coral-tint"
+                        : "bg-white dark:bg-kalvium-dark-surface text-kalvium-text dark:text-kalvium-dark-text border-kalvium-border dark:border-kalvium-dark-border hover:border-kalvium-coral"
+                    }`}
+                  >
+                    {saving ? (
+                      <>
+                        <span className="w-3.5 h-3.5 rounded-full border-2 border-current border-t-transparent animate-spin shrink-0" />
+                        <span>Saving…</span>
+                      </>
+                    ) : isSaved ? (
+                      <>
+                        <BookmarkCheck className="w-3.5 h-3.5 fill-kalvium-coral text-kalvium-coral" />
+                        <span>Saved to My Schedule</span>
+                      </>
+                    ) : (
+                      <>
+                        <Bookmark className="w-3.5 h-3.5" />
+                        <span>Save to My Schedule</span>
+                      </>
+                    )}
+                  </button>
+                </>
+              )}
             </div>
           )}
         </div>
@@ -646,6 +785,21 @@ export default function EventDetailDrawer({
         onSuccess={() => {
           onClose();
           router.refresh();
+        }}
+      />
+
+      {/* Upload Certificate & Achievements Modal (Part 2) */}
+      <UploadCertificateModal
+        isOpen={certModalOpen}
+        onClose={() => setCertModalOpen(false)}
+        eventId={event.id}
+        eventTitle={event.title}
+        eventDate={event.date}
+        eventVenue={event.venue}
+        onSuccess={() => {
+          setRefreshHallOfFame((prev) => prev + 1);
+          fetchEnrollmentStatus(event.id);
+          fetchUserParticipation(event.id);
         }}
       />
     </>
