@@ -20,11 +20,14 @@ import {
   Search,
   Eye,
   Info,
+  Users,
+  Trash2,
 } from "lucide-react";
 import confetti from "canvas-confetti";
 import CampusVerifiedBadge from "@/components/CampusVerifiedBadge";
 import dynamic from "next/dynamic";
 const DeclineReasonModal = dynamic(() => import("@/components/DeclineReasonModal"), { ssr: false });
+const EventAttendeesModal = dynamic(() => import("@/components/EventAttendeesModal"), { ssr: false });
 import { useAuth } from "@/context/AuthContext";
 import { auth as firebaseClientAuth } from "@/lib/firebase/client";
 import { ConfidenceLevel } from "@/lib/poster-shared";
@@ -40,6 +43,12 @@ export default function CampusManagerVerificationQueue() {
   const [isEditing, setIsEditing] = useState(false);
   const [editableFields, setEditableFields] = useState<any>({});
 
+  // Attendee Roster Modal state
+  const [attendeesEvent, setAttendeesEvent] = useState<{ id: string; title: string; date?: string; venue?: string } | null>(null);
+
+  // Deletion confirm state
+  const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
+
   // Tab state: single unified workspace
   const [activeTab, setActiveTab] = useState<"PENDING" | "APPROVED" | "DECLINED">("PENDING");
   const [history, setHistory] = useState<any[]>([]);
@@ -49,6 +58,55 @@ export default function CampusManagerVerificationQueue() {
   const [declineModalOpen, setDeclineModalOpen] = useState(false);
   const [actionLoading, setActionLoading] = useState(false);
   const [successToast, setSuccessToast] = useState<string | null>(null);
+
+  const handleManagerDeleteEvent = async (eventId: string) => {
+    try {
+      const headers: Record<string, string> = {};
+      try {
+        const idToken = await firebaseClientAuth.currentUser?.getIdToken();
+        if (idToken) headers["Authorization"] = `Bearer ${idToken}`;
+      } catch {}
+      const res = await fetch(`/api/organizer/events/${eventId}`, {
+        method: "DELETE",
+        headers,
+      });
+      if (res.ok) {
+        setSuccessToast("Event permanently deleted by Manager.");
+        setTimeout(() => setSuccessToast(null), 4000);
+        fetchHistory();
+        fetchPendingQueue();
+        if (selectedEvent?.id === eventId) setSelectedEvent(null);
+      } else {
+        const err = await res.json();
+        alert(err.error || "Failed to delete event.");
+      }
+    } catch {
+      alert("Network error deleting event.");
+    } finally {
+      setConfirmDeleteId(null);
+    }
+  };
+
+  const handleDismissDeletionRequest = async (eventId: string) => {
+    try {
+      const headers: Record<string, string> = {};
+      try {
+        const idToken = await firebaseClientAuth.currentUser?.getIdToken();
+        if (idToken) headers["Authorization"] = `Bearer ${idToken}`;
+      } catch {}
+      const res = await fetch(`/api/organizer/events/${eventId}/request-delete`, {
+        method: "DELETE",
+        headers,
+      });
+      if (res.ok) {
+        setSuccessToast("Deletion request dismissed. Event kept active.");
+        setTimeout(() => setSuccessToast(null), 4000);
+        fetchPendingQueue();
+      }
+    } catch (e) {
+      console.error(e);
+    }
+  };
 
   const fetchPendingQueue = async () => {
     if (!user) return;
@@ -320,6 +378,88 @@ export default function CampusManagerVerificationQueue() {
         </div>
       )}
 
+      {/* Organizer Deletion Requests Section */}
+      {data?.deletionRequests && data.deletionRequests.length > 0 && (
+        <div className="mb-8 p-5 sm:p-6 rounded-3xl bg-amber-500/10 border border-amber-500/30 shadow-soft-sm space-y-4 animate-fade-in">
+          <div className="flex items-center justify-between flex-wrap gap-2">
+            <div className="flex items-center gap-2.5">
+              <div className="p-2 rounded-xl bg-amber-500/20 text-amber-700 dark:text-amber-400">
+                <AlertTriangle className="w-5 h-5" />
+              </div>
+              <div>
+                <h2 className="text-sm font-bold text-amber-900 dark:text-amber-300">
+                  Organizer Deletion Requests ({data.deletionRequests.length})
+                </h2>
+                <p className="text-xs text-amber-800/80 dark:text-amber-400/80">
+                  Organizers have requested to cancel or remove the following approved events. Review their reasons and decide whether to permanently delete or dismiss.
+                </p>
+              </div>
+            </div>
+            <span className="text-[10px] font-bold uppercase tracking-wider bg-amber-500/20 text-amber-800 dark:text-amber-300 px-3 py-1 rounded-full">
+              Action Required
+            </span>
+          </div>
+
+          <div className="space-y-3">
+            {data.deletionRequests.map((reqEvent: any) => (
+              <div
+                key={reqEvent.id}
+                className="p-4 rounded-2xl bg-white dark:bg-kalvium-dark-surface border border-amber-500/30 shadow-soft-xs flex flex-col md:flex-row md:items-center justify-between gap-4"
+              >
+                <div className="min-w-0 flex-1">
+                  <div className="flex items-center gap-2 mb-1 flex-wrap">
+                    <span className="text-[10px] font-sans font-bold uppercase tracking-wider text-kalvium-coral">
+                      {reqEvent.category}
+                    </span>
+                    <span className="text-[10px] text-kalvium-muted dark:text-kalvium-dark-muted">
+                      {reqEvent.date} • {reqEvent.venue}
+                    </span>
+                  </div>
+                  <Link href={`/events/${reqEvent.id}`} target="_blank">
+                    <h3 className="text-sm font-bold text-kalvium-text dark:text-kalvium-dark-text hover:text-kalvium-coral transition-colors truncate">
+                      {reqEvent.title}
+                    </h3>
+                  </Link>
+                  <div className="mt-2 p-2.5 rounded-xl bg-kalvium-surface-alt dark:bg-kalvium-dark-surface-alt border border-kalvium-border dark:border-kalvium-dark-border text-xs space-y-0.5">
+                    <p className="text-kalvium-text dark:text-kalvium-dark-text font-medium">
+                      <span className="text-amber-700 dark:text-amber-400 font-bold">Reason:</span> {reqEvent.deletionReason || "No reason specified"}
+                    </p>
+                    {reqEvent.deletionNotes && (
+                      <p className="text-kalvium-muted dark:text-kalvium-dark-muted text-[11px]">
+                        <span className="font-semibold">Notes:</span> {reqEvent.deletionNotes}
+                      </p>
+                    )}
+                    {reqEvent.deletionRequestedBy && (
+                      <p className="text-[10px] text-kalvium-muted dark:text-kalvium-dark-muted pt-0.5">
+                        Requested by: {reqEvent.deletionRequestedBy.name || reqEvent.deletionRequestedBy.email}
+                      </p>
+                    )}
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-2.5 shrink-0 self-start md:self-center">
+                  <button
+                    type="button"
+                    onClick={() => handleDismissDeletionRequest(reqEvent.id)}
+                    className="px-3.5 py-2 rounded-full border border-kalvium-border dark:border-kalvium-dark-border hover:bg-kalvium-surface-alt text-xs font-semibold text-kalvium-muted hover:text-kalvium-text transition active:scale-95"
+                  >
+                    Dismiss Request
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => handleManagerDeleteEvent(reqEvent.id)}
+                    className="px-4 py-2 rounded-full bg-kalvium-coral hover:bg-kalvium-coral-hover text-white text-xs font-bold shadow-sm transition active:scale-95 flex items-center gap-1.5"
+                  >
+                    <Trash2 className="w-3.5 h-3.5" />
+                    <span>Approve & Delete</span>
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
       {/* Status Metrics Strip acting as Interactive Tabs */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-3.5 mb-8">
         <button
@@ -490,19 +630,66 @@ export default function CampusManagerVerificationQueue() {
                           </div>
                         </div>
 
-                        <div className="sm:text-right shrink-0 flex sm:flex-col items-center sm:items-end justify-between gap-1">
+                        <div className="sm:text-right shrink-0 flex sm:flex-col items-center sm:items-end justify-between gap-1.5">
                           <span className="text-xs text-kalvium-text dark:text-kalvium-dark-text font-semibold">
                             Verified by {entry.manager?.name || "Manager"}
                           </span>
-                          {entry.event?.id && (
-                            <Link
-                              href={`/events/${entry.event.id}`}
-                              className="inline-flex items-center gap-1 text-xs font-bold text-kalvium-coral hover:underline"
-                            >
-                              <span>View Live</span>
-                              <ExternalLink className="w-3 h-3" />
-                            </Link>
-                          )}
+                          <div className="flex items-center gap-2 flex-wrap">
+                            {entry.event?.id && (
+                              <button
+                                type="button"
+                                onClick={() => setAttendeesEvent({
+                                  id: entry.event.id,
+                                  title: entry.event.title,
+                                  date: entry.event.date,
+                                  venue: entry.event.venue,
+                                })}
+                                className="inline-flex items-center gap-1 text-[11px] font-bold text-kalvium-coral hover:text-white px-2.5 py-1 rounded-full bg-kalvium-coral-tint dark:bg-kalvium-dark-coral-tint hover:bg-kalvium-coral transition shadow-soft-xs"
+                              >
+                                <Users className="w-3 h-3" />
+                                <span>Attendees ({entry.event?.enrolledCount || 0})</span>
+                              </button>
+                            )}
+                            {entry.event?.id && (
+                              <Link
+                                href={`/events/${entry.event.id}`}
+                                className="inline-flex items-center gap-1 text-xs font-bold text-kalvium-muted dark:text-kalvium-dark-muted hover:text-kalvium-coral transition"
+                              >
+                                <span>View Live</span>
+                                <ExternalLink className="w-3 h-3" />
+                              </Link>
+                            )}
+                            {entry.event?.id && (
+                              confirmDeleteId === entry.event.id ? (
+                                <div className="flex items-center gap-1.5 animate-fade-in">
+                                  <span className="text-[11px] text-kalvium-coral font-medium">Delete?</span>
+                                  <button
+                                    type="button"
+                                    onClick={() => handleManagerDeleteEvent(entry.event.id)}
+                                    className="px-2.5 py-1 rounded-full text-[10px] font-bold bg-kalvium-coral text-white hover:bg-kalvium-coral/90 transition shadow-sm"
+                                  >
+                                    Yes
+                                  </button>
+                                  <button
+                                    type="button"
+                                    onClick={() => setConfirmDeleteId(null)}
+                                    className="px-2.5 py-1 rounded-full text-[10px] font-bold bg-kalvium-surface-alt text-kalvium-muted border border-kalvium-border transition"
+                                  >
+                                    No
+                                  </button>
+                                </div>
+                              ) : (
+                                <button
+                                  type="button"
+                                  onClick={() => setConfirmDeleteId(entry.event.id)}
+                                  className="inline-flex items-center gap-1 text-xs font-semibold text-kalvium-muted hover:text-kalvium-coral p-1.5 rounded-full hover:bg-kalvium-coral/10 border border-transparent hover:border-kalvium-border transition"
+                                  title="Permanently Delete Event (Past/Unneeded)"
+                                >
+                                  <Trash2 className="w-3.5 h-3.5" />
+                                </button>
+                              )
+                            )}
+                          </div>
                         </div>
                       </div>
                     ))}
@@ -846,6 +1033,37 @@ export default function CampusManagerVerificationQueue() {
                   </div>
 
                   <div className="flex items-center gap-3 w-full sm:w-auto">
+                    {/* DIRECT DELETE BUTTON */}
+                    {confirmDeleteId === selectedEvent.id ? (
+                      <div className="flex items-center gap-1.5 animate-fade-in">
+                        <span className="text-[11px] text-kalvium-coral font-medium">Delete?</span>
+                        <button
+                          type="button"
+                          onClick={() => handleManagerDeleteEvent(selectedEvent.id)}
+                          className="px-3 py-2 rounded-full text-xs font-bold bg-kalvium-coral text-white hover:bg-kalvium-coral/90 transition shadow-sm"
+                        >
+                          Yes, Delete
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setConfirmDeleteId(null)}
+                          className="px-3 py-2 rounded-full text-xs font-bold bg-kalvium-surface-alt text-kalvium-muted border border-kalvium-border transition"
+                        >
+                          No
+                        </button>
+                      </div>
+                    ) : (
+                      <button
+                        type="button"
+                        onClick={() => setConfirmDeleteId(selectedEvent.id)}
+                        disabled={actionLoading}
+                        className="p-2.5 rounded-full text-kalvium-muted hover:text-kalvium-coral hover:bg-kalvium-coral/10 border border-kalvium-border dark:border-kalvium-dark-border transition"
+                        title="Delete this event immediately (e.g. useless/spam)"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+                    )}
+
                     {/* DECLINE BUTTON */}
                     <button
                       onClick={() => setDeclineModalOpen(true)}
@@ -927,21 +1145,41 @@ export default function CampusManagerVerificationQueue() {
                       </div>
                     </div>
 
-                    <div className="sm:text-right shrink-0">
-                      <span className="text-[11px] font-sans text-kalvium-muted dark:text-kalvium-dark-muted block">
-                        {new Date(entry.timestamp).toLocaleDateString()}
-                      </span>
-                      <span className="text-xs text-kalvium-ink dark:text-kalvium-dark-ink font-semibold block mt-0.5">
-                        Verified by {entry.manager?.name}
-                      </span>
-                      {entry.event?.id && (
-                        <Link
-                          href={`/events/${entry.event.id}`}
-                          className="inline-flex items-center gap-1 text-xs font-bold text-kalvium-coral hover:underline mt-1"
-                        >
-                          View Live <ExternalLink className="w-3 h-3" />
-                        </Link>
-                      )}
+                    <div className="sm:text-right shrink-0 flex sm:flex-col items-center sm:items-end justify-between gap-1.5">
+                      <div>
+                        <span className="text-[11px] font-sans text-kalvium-muted dark:text-kalvium-dark-muted block">
+                          {new Date(entry.timestamp).toLocaleDateString()}
+                        </span>
+                        <span className="text-xs text-kalvium-ink dark:text-kalvium-dark-ink font-semibold block mt-0.5">
+                          Verified by {entry.manager?.name}
+                        </span>
+                      </div>
+                      <div className="flex items-center gap-2 flex-wrap mt-1">
+                        {entry.event?.id && (
+                          <button
+                            type="button"
+                            onClick={() => setAttendeesEvent({
+                              id: entry.event.id,
+                              title: entry.event.title,
+                              date: entry.event.date,
+                              venue: entry.event.venue,
+                            })}
+                            className="inline-flex items-center gap-1 text-[11px] font-bold text-kalvium-coral hover:text-white px-2.5 py-1 rounded-full bg-kalvium-coral-tint dark:bg-kalvium-dark-coral-tint hover:bg-kalvium-coral transition shadow-soft-xs"
+                          >
+                            <Users className="w-3 h-3" />
+                            <span>Attendees ({entry.event?.enrolledCount || 0})</span>
+                          </button>
+                        )}
+                        {entry.event?.id && (
+                          <Link
+                            href={`/events/${entry.event.id}`}
+                            className="inline-flex items-center gap-1 text-xs font-bold text-kalvium-muted dark:text-kalvium-dark-muted hover:text-kalvium-coral transition"
+                          >
+                            <span>View Live</span>
+                            <ExternalLink className="w-3 h-3" />
+                          </Link>
+                        )}
+                      </div>
                     </div>
                   </div>
                 ))}
@@ -1031,6 +1269,18 @@ export default function CampusManagerVerificationQueue() {
           onClose={() => setDeclineModalOpen(false)}
           onConfirmDecline={handleConfirmDecline}
           eventTitle={selectedEvent.title}
+        />
+      )}
+
+      {/* Attendee Roster Modal */}
+      {attendeesEvent && (
+        <EventAttendeesModal
+          isOpen={Boolean(attendeesEvent)}
+          onClose={() => setAttendeesEvent(null)}
+          eventId={attendeesEvent.id}
+          eventTitle={attendeesEvent.title}
+          eventDate={attendeesEvent.date}
+          eventVenue={attendeesEvent.venue}
         />
       )}
     </div>

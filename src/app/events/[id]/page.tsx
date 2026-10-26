@@ -17,10 +17,16 @@ import {
   Flame,
   ShieldCheck,
   Sparkles,
+  Users,
+  CheckCircle2,
+  Trash2,
+  AlertTriangle,
 } from "lucide-react";
 import CampusVerifiedBadge from "@/components/CampusVerifiedBadge";
 import dynamic from "next/dynamic";
 const ClashWarningModal = dynamic(() => import("@/components/ClashWarningModal"), { ssr: false });
+const EventAttendeesModal = dynamic(() => import("@/components/EventAttendeesModal"), { ssr: false });
+const RequestDeleteModal = dynamic(() => import("@/components/RequestDeleteModal"), { ssr: false });
 import MagneticButton from "@/components/MagneticButton";
 import { useAuth } from "@/context/AuthContext";
 import { useToast } from "@/components/Toast";
@@ -30,6 +36,7 @@ export default function EventDetailPage() {
   const params = useParams();
   const router = useRouter();
   const { user } = useAuth();
+  const { success, warning, error: toastError } = useToast();
   const id = params?.id as string;
 
   const isManager = user?.role?.toUpperCase() === "CAMPUS_MANAGER";
@@ -41,16 +48,44 @@ export default function EventDetailPage() {
   const [error, setError] = useState<string | null>(null);
   const [isSaved, setIsSaved] = useState(false);
   const [saving, setSaving] = useState(false);
+
+  // Enrollment states
+  const [isEnrolled, setIsEnrolled] = useState(false);
+  const [enrolledCount, setEnrolledCount] = useState<number>(0);
+  const [enrolling, setEnrolling] = useState(false);
+  const [attendeesModalOpen, setAttendeesModalOpen] = useState(false);
+
+  // Deletion states
+  const [confirmDelete, setConfirmDelete] = useState(false);
+  const [deleteModalOpen, setDeleteModalOpen] = useState(false);
+  const [deleting, setDeleting] = useState(false);
+
   const [clashModalOpen, setClashModalOpen] = useState(false);
   const [clashData, setClashData] = useState<any>(null);
 
   useEffect(() => {
     if (!id) return;
     fetchEvent();
+    fetchEnrollmentStatus(id);
     if (!isStaffOrManager) {
       checkIfSaved();
     }
   }, [id, user, isStaffOrManager]);
+
+  const fetchEnrollmentStatus = async (eventId: string) => {
+    try {
+      const res = await fetch(`/api/events/${eventId}/apply`, { cache: "no-store" });
+      if (res.ok) {
+        const data = await res.json();
+        setIsEnrolled(Boolean(data.isEnrolled));
+        if (typeof data.enrolledCount === "number") {
+          setEnrolledCount(data.enrolledCount);
+        }
+      }
+    } catch {
+      // ignore
+    }
+  };
 
   const fetchEvent = async () => {
     setLoading(true);
@@ -62,6 +97,9 @@ export default function EventDetailPage() {
       } else {
         const data = await res.json();
         setEvent(data.event);
+        if (typeof data.event?.enrolledCount === "number") {
+          setEnrolledCount(data.event.enrolledCount);
+        }
       }
     } catch (e: any) {
       setError(e.message || "Failed to load event.");
@@ -84,7 +122,38 @@ export default function EventDetailPage() {
     }
   };
 
-  const { success, warning } = useToast();
+  const handleApplyToggle = async () => {
+    if (!user) {
+      warning("Please sign in to apply for this event.");
+      router.push(`/login?redirect=/events/${id}`);
+      return;
+    }
+
+    setEnrolling(true);
+    try {
+      const method = isEnrolled ? "DELETE" : "POST";
+      const res = await fetch(`/api/events/${id}/apply`, { method });
+      if (res.ok) {
+        const data = await res.json();
+        setIsEnrolled(Boolean(data.isEnrolled));
+        if (typeof data.enrolledCount === "number") {
+          setEnrolledCount(data.enrolledCount);
+        }
+        if (data.isEnrolled) {
+          success("✓ Application confirmed! You are officially enrolled in this event.");
+        } else {
+          success("Your enrollment has been withdrawn.");
+        }
+      } else {
+        const err = await res.json();
+        warning(err.error || "Failed to update enrollment.");
+      }
+    } catch {
+      warning("Network error while submitting application.");
+    } finally {
+      setEnrolling(false);
+    }
+  };
 
   const handleSaveToggle = async () => {
     if (!user) {
@@ -144,6 +213,28 @@ export default function EventDetailPage() {
       }
     } finally {
       setSaving(false);
+    }
+  };
+
+  const handleDeleteEvent = async () => {
+    if (!event) return;
+    setDeleting(true);
+    try {
+      const res = await fetch(`/api/organizer/events/${event.id}`, {
+        method: "DELETE",
+      });
+      if (res.ok) {
+        success("Event permanently deleted by Manager.");
+        router.push("/events");
+      } else {
+        const data = await res.json();
+        toastError(data.error || "Failed to delete event.");
+      }
+    } catch {
+      toastError("Network error while deleting event.");
+    } finally {
+      setDeleting(false);
+      setConfirmDelete(false);
     }
   };
 
@@ -244,51 +335,147 @@ export default function EventDetailPage() {
             </p>
           </div>
 
-          <div className="shrink-0">
+          <div className="shrink-0 flex items-center gap-3 flex-wrap">
             {isManager ? (
-              <Link
-                href="/dashboard/manager"
-                className="rounded-full px-5 py-2.5 text-xs font-bold flex items-center gap-2 bg-kalvium-success-tint dark:bg-kalvium-dark-success-tint text-kalvium-success border border-kalvium-success/30 hover:bg-kalvium-success hover:text-white transition active:scale-95 shadow-soft-xs"
-              >
-                <ShieldCheck size={16} />
-                <span>Manager's Portal</span>
-              </Link>
-            ) : isOrganizer ? (
-              <Link
-                href="/dashboard/organizer"
-                className="rounded-full px-5 py-2.5 text-xs font-bold flex items-center gap-2 bg-kalvium-surface-alt dark:bg-kalvium-dark-surface-alt text-kalvium-text dark:text-kalvium-dark-text border border-kalvium-border dark:border-kalvium-dark-border hover:border-kalvium-coral hover:text-kalvium-coral transition active:scale-95 shadow-soft-xs"
-              >
-                <Sparkles size={16} className="text-kalvium-coral" />
-                <span>Organizer's Portal</span>
-              </Link>
-            ) : (
-              <button
-                onClick={handleSaveToggle}
-                disabled={saving}
-                className={`rounded-full px-6 py-3 text-sm font-semibold flex items-center gap-2 transition active:scale-95 shadow-sm ${
-                  isSaved
-                    ? "bg-kalvium-coral text-white hover:bg-kalvium-coral-hover shadow-sm"
-                    : "bg-white dark:bg-kalvium-dark-surface text-kalvium-text dark:text-kalvium-dark-text border border-kalvium-border dark:border-kalvium-dark-border hover:bg-kalvium-surface-alt dark:hover:bg-kalvium-dark-surface-alt"
-                }`}
-              >
-                {isSaved ? (
-                  <>
-                    <BookmarkCheck size={16} className="fill-white" />
-                    <span>Saved to schedule</span>
-                  </>
+              <>
+                <button
+                  type="button"
+                  onClick={() => setAttendeesModalOpen(true)}
+                  className="rounded-full px-5 py-2.5 text-xs font-bold flex items-center gap-2 bg-kalvium-coral text-white hover:bg-kalvium-coral-hover transition active:scale-95 shadow-soft-xs"
+                >
+                  <Users size={16} />
+                  <span>Enrolled Students ({enrolledCount})</span>
+                </button>
+                <Link
+                  href="/dashboard/manager"
+                  className="rounded-full px-4 py-2.5 text-xs font-semibold flex items-center gap-2 bg-kalvium-surface-alt dark:bg-kalvium-dark-surface-alt text-kalvium-text dark:text-kalvium-dark-text border border-kalvium-border dark:border-kalvium-dark-border hover:border-kalvium-coral transition active:scale-95"
+                >
+                  <ShieldCheck size={16} className="text-kalvium-success" />
+                  <span>Manager Portal</span>
+                </Link>
+                {confirmDelete ? (
+                  <div className="flex items-center gap-1.5 animate-fade-in">
+                    <span className="text-xs text-kalvium-coral font-medium">Delete?</span>
+                    <button
+                      onClick={handleDeleteEvent}
+                      disabled={deleting}
+                      className="px-3 py-2 rounded-full text-xs font-bold bg-kalvium-coral text-white transition active:scale-95 shadow-sm"
+                    >
+                      {deleting ? "Deleting…" : "Yes, Delete"}
+                    </button>
+                    <button
+                      onClick={() => setConfirmDelete(false)}
+                      className="px-3 py-2 rounded-full text-xs font-bold bg-kalvium-surface-alt text-kalvium-muted border border-kalvium-border transition"
+                    >
+                      No
+                    </button>
+                  </div>
                 ) : (
-                  <>
-                    <Bookmark size={16} />
-                    <span>Save to schedule</span>
-                  </>
+                  <button
+                    onClick={() => setConfirmDelete(true)}
+                    className="rounded-full px-4 py-2.5 text-xs font-semibold flex items-center gap-2 border border-kalvium-border hover:border-kalvium-coral hover:text-kalvium-coral bg-white dark:bg-kalvium-dark-surface text-kalvium-muted transition active:scale-95"
+                    title="Permanently Delete Event (Manager Action)"
+                  >
+                    <Trash2 size={15} />
+                    <span>Delete Event</span>
+                  </button>
                 )}
-              </button>
+              </>
+            ) : isOrganizer ? (
+              <>
+                <button
+                  type="button"
+                  onClick={() => setAttendeesModalOpen(true)}
+                  className="rounded-full px-5 py-2.5 text-xs font-bold flex items-center gap-2 bg-kalvium-coral text-white hover:bg-kalvium-coral-hover transition active:scale-95 shadow-soft-xs"
+                >
+                  <Users size={16} />
+                  <span>Enrolled Students ({enrolledCount})</span>
+                </button>
+                <Link
+                  href="/dashboard/organizer"
+                  className="rounded-full px-4 py-2.5 text-xs font-semibold flex items-center gap-2 bg-kalvium-surface-alt dark:bg-kalvium-dark-surface-alt text-kalvium-text dark:text-kalvium-dark-text border border-kalvium-border dark:border-kalvium-dark-border hover:border-kalvium-coral transition active:scale-95"
+                >
+                  <Sparkles size={16} className="text-kalvium-coral" />
+                  <span>Organizer Portal</span>
+                </Link>
+                {event.deletionRequested ? (
+                  <span className="rounded-full px-4 py-2.5 text-xs font-semibold flex items-center gap-1.5 bg-amber-500/10 text-amber-700 dark:text-amber-400 border border-amber-500/20">
+                    <AlertTriangle size={15} />
+                    <span>Deletion Requested</span>
+                  </span>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={() => setDeleteModalOpen(true)}
+                    className="rounded-full px-4 py-2.5 text-xs font-semibold flex items-center gap-2 border border-kalvium-border hover:border-kalvium-coral hover:text-kalvium-coral bg-white dark:bg-kalvium-dark-surface text-kalvium-muted transition active:scale-95"
+                    title="Request Event Deletion from Campus Manager"
+                  >
+                    <Trash2 size={15} />
+                    <span>Request Deletion</span>
+                  </button>
+                )}
+              </>
+            ) : (
+              <>
+                <button
+                  onClick={handleApplyToggle}
+                  disabled={enrolling || isPast}
+                  className={`rounded-full px-6 py-3 text-sm font-bold flex items-center gap-2 transition active:scale-95 shadow-soft-xs disabled:opacity-60 disabled:cursor-not-allowed ${
+                    isEnrolled
+                      ? "bg-kalvium-success-tint dark:bg-kalvium-dark-success-tint text-kalvium-success border border-kalvium-success/40 hover:bg-kalvium-success hover:text-white"
+                      : isPast
+                      ? "bg-kalvium-surface-alt dark:bg-kalvium-dark-surface-alt text-kalvium-muted border border-kalvium-border"
+                      : "bg-kalvium-coral text-white hover:bg-kalvium-coral-hover shadow-md shadow-kalvium-coral/25"
+                  }`}
+                >
+                  {enrolling ? (
+                    <>
+                      <span className="w-4 h-4 rounded-full border-2 border-current border-t-transparent animate-spin shrink-0" />
+                      <span>Applying…</span>
+                    </>
+                  ) : isPast ? (
+                    <span>Event Concluded</span>
+                  ) : isEnrolled ? (
+                    <>
+                      <CheckCircle2 size={16} />
+                      <span>✓ Enrolled • Withdraw</span>
+                    </>
+                  ) : (
+                    <>
+                      <Users size={16} />
+                      <span>Apply / Enroll Now</span>
+                    </>
+                  )}
+                </button>
+
+                <button
+                  onClick={handleSaveToggle}
+                  disabled={saving}
+                  className={`rounded-full px-5 py-3 text-xs font-semibold flex items-center gap-2 transition active:scale-95 border ${
+                    isSaved
+                      ? "bg-kalvium-surface-alt dark:bg-kalvium-dark-surface-alt text-kalvium-coral border-kalvium-coral/30 hover:bg-kalvium-coral-tint"
+                      : "bg-white dark:bg-kalvium-dark-surface text-kalvium-text dark:text-kalvium-dark-text border-kalvium-border dark:border-kalvium-dark-border hover:bg-kalvium-surface-alt"
+                  }`}
+                >
+                  {isSaved ? (
+                    <>
+                      <BookmarkCheck size={15} className="fill-kalvium-coral text-kalvium-coral" />
+                      <span>Saved</span>
+                    </>
+                  ) : (
+                    <>
+                      <Bookmark size={15} />
+                      <span>Save</span>
+                    </>
+                  )}
+                </button>
+              </>
             )}
           </div>
         </div>
 
         {/* Info Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           <div className="bg-white dark:bg-kalvium-dark-surface rounded-2xl p-4 border border-kalvium-border dark:border-kalvium-dark-border shadow-kalvium-sm">
             <span className="flex items-center gap-2 text-xs font-medium text-kalvium-muted dark:text-kalvium-dark-muted mb-1">
               <Calendar size={14} className="text-kalvium-coral" />
@@ -314,6 +501,19 @@ export default function EventDetailPage() {
             </span>
             <p className="font-display font-semibold text-kalvium-text dark:text-kalvium-dark-text truncate">{event.venue}</p>
             <p className="text-xs text-kalvium-muted dark:text-kalvium-dark-muted mt-0.5">On campus</p>
+          </div>
+
+          <div className="bg-white dark:bg-kalvium-dark-surface rounded-2xl p-4 border border-kalvium-border dark:border-kalvium-dark-border shadow-kalvium-sm">
+            <span className="flex items-center gap-2 text-xs font-medium text-kalvium-muted dark:text-kalvium-dark-muted mb-1">
+              <Users size={14} className="text-kalvium-coral" />
+              Applications
+            </span>
+            <p className="font-display font-semibold text-kalvium-text dark:text-kalvium-dark-text">
+              {enrolledCount} Student{enrolledCount === 1 ? "" : "s"}
+            </p>
+            <p className="text-xs text-kalvium-muted dark:text-kalvium-dark-muted mt-0.5">
+              {isEnrolled ? "✓ You are enrolled" : "Enrolled attendees"}
+            </p>
           </div>
         </div>
 
@@ -383,6 +583,31 @@ export default function EventDetailPage() {
             date: event.date,
           }}
           overlapStr={clashData.overlap?.formatted || "Direct Overlap"}
+        />
+      )}
+
+      {/* Attendee Roster Modal */}
+      <EventAttendeesModal
+        isOpen={attendeesModalOpen}
+        onClose={() => setAttendeesModalOpen(false)}
+        eventId={id}
+        eventTitle={event.title}
+        eventDate={event.date}
+        eventVenue={event.venue}
+      />
+
+      {/* Organizer Request Deletion Modal */}
+      {event && (
+        <RequestDeleteModal
+          isOpen={deleteModalOpen}
+          onClose={() => setDeleteModalOpen(false)}
+          eventId={event.id}
+          eventTitle={event.title}
+          eventDate={event.date}
+          eventVenue={event.venue}
+          onSuccess={() => {
+            fetchEvent();
+          }}
         />
       )}
     </div>

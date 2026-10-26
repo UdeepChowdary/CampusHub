@@ -16,11 +16,17 @@ import {
   CheckCircle2,
   ShieldCheck,
   Sparkles,
+  Users,
+  Trash2,
+  AlertTriangle,
 } from "lucide-react";
 import CampusVerifiedBadge from "./CampusVerifiedBadge";
 import dynamic from "next/dynamic";
 const ClashWarningModal = dynamic(() => import("./ClashWarningModal"), { ssr: false });
+const EventAttendeesModal = dynamic(() => import("./EventAttendeesModal"), { ssr: false });
+const RequestDeleteModal = dynamic(() => import("./RequestDeleteModal"), { ssr: false });
 import { useAuth } from "@/context/AuthContext";
+import { useToast } from "@/components/Toast";
 import { useRouter } from "next/navigation";
 import { isStartingSoon, getHumanCountdown, isEventPast } from "@/lib/time";
 
@@ -41,15 +47,45 @@ export default function EventDetailDrawer({
 }: EventDetailDrawerProps) {
   const { user } = useAuth();
   const router = useRouter();
+  const { success, error: toastError } = useToast();
   const [isSaved, setIsSaved] = useState(false);
-
   const [saving, setSaving] = useState(false);
+
+  // Enrollment states
+  const [isEnrolled, setIsEnrolled] = useState(false);
+  const [enrolledCount, setEnrolledCount] = useState<number>(0);
+  const [enrolling, setEnrolling] = useState(false);
+  const [attendeesModalOpen, setAttendeesModalOpen] = useState(false);
+
+  // Deletion states
+  const [confirmDelete, setConfirmDelete] = useState(false);
+  const [requestDeleteModalOpen, setRequestDeleteModalOpen] = useState(false);
+  const [deleting, setDeleting] = useState(false);
+
   const [clashModalOpen, setClashModalOpen] = useState(false);
   const [clashData, setClashData] = useState<any>(null);
+
+  const fetchEnrollmentStatus = async (eventId: string) => {
+    try {
+      const res = await fetch(`/api/events/${eventId}/apply`, { cache: "no-store" });
+      if (res.ok) {
+        const data = await res.json();
+        setIsEnrolled(Boolean(data.isEnrolled));
+        if (typeof data.enrolledCount === "number") {
+          setEnrolledCount(data.enrolledCount);
+        }
+      }
+    } catch {
+      // ignore
+    }
+  };
 
   useEffect(() => {
     if (event) {
       setIsSaved(Boolean(event.isSaved));
+      setIsEnrolled(Boolean(event.isEnrolled));
+      setEnrolledCount(typeof event.enrolledCount === "number" ? event.enrolledCount : 0);
+      fetchEnrollmentStatus(event.id);
     }
   }, [event]);
 
@@ -145,6 +181,65 @@ export default function EventDetailDrawer({
       console.error("Save toggle error:", err);
     } finally {
       setSaving(false);
+    }
+  };
+
+  const handleApplyClick = async () => {
+    if (!user) {
+      router.push(`/login?redirect=/events/${event.id}`);
+      onClose();
+      return;
+    }
+
+    setEnrolling(true);
+    try {
+      const method = isEnrolled ? "DELETE" : "POST";
+      const res = await fetch(`/api/events/${event.id}/apply`, {
+        method,
+      });
+
+      if (res.ok) {
+        const data = await res.json();
+        setIsEnrolled(Boolean(data.isEnrolled));
+        if (typeof data.enrolledCount === "number") {
+          setEnrolledCount(data.enrolledCount);
+        }
+        if (data.isEnrolled) {
+          success("✓ Application confirmed! You are officially enrolled in this event.");
+        } else {
+          success("Your enrollment has been withdrawn.");
+        }
+      } else {
+        const err = await res.json();
+        toastError(err.error || "Failed to update enrollment.");
+      }
+    } catch {
+      toastError("Enrollment request failed.");
+    } finally {
+      setEnrolling(false);
+    }
+  };
+
+  const handleManagerDelete = async () => {
+    if (!event) return;
+    setDeleting(true);
+    try {
+      const res = await fetch(`/api/organizer/events/${event.id}`, {
+        method: "DELETE",
+      });
+      if (res.ok) {
+        success("Event permanently deleted by Manager.");
+        onClose();
+        router.refresh();
+      } else {
+        const data = await res.json();
+        toastError(data.error || "Failed to delete event.");
+      }
+    } catch {
+      toastError("Network error while deleting event.");
+    } finally {
+      setDeleting(false);
+      setConfirmDelete(false);
     }
   };
 
@@ -262,6 +357,29 @@ export default function EventDetailDrawer({
                   <p className="text-[11px] text-kalvium-muted dark:text-kalvium-dark-muted">Official host</p>
                 </div>
               </div>
+
+              <div className="flex items-start justify-between gap-3 text-kalvium-text dark:text-kalvium-dark-text pt-1">
+                <div className="flex items-start gap-3">
+                  <Users className="w-4 h-4 text-kalvium-coral shrink-0 mt-0.5" />
+                  <div>
+                    <p className="font-semibold text-kalvium-text dark:text-kalvium-dark-text">
+                      {enrolledCount} Student{enrolledCount === 1 ? "" : "s"} Enrolled
+                    </p>
+                    <p className="text-[11px] text-kalvium-muted dark:text-kalvium-dark-muted">
+                      {isEnrolled ? "✓ You are enrolled in this event" : "Open for student applications"}
+                    </p>
+                  </div>
+                </div>
+                {(isManager || isOrganizer) && (
+                  <button
+                    type="button"
+                    onClick={() => setAttendeesModalOpen(true)}
+                    className="px-3 py-1 rounded-full text-xs font-bold text-kalvium-coral bg-kalvium-coral-tint dark:bg-kalvium-dark-coral-tint hover:bg-kalvium-coral hover:text-white transition shrink-0"
+                  >
+                    View Roster ({enrolledCount})
+                  </button>
+                )}
+              </div>
             </div>
 
 
@@ -344,49 +462,142 @@ export default function EventDetailDrawer({
 
           {/* Sticky Frosted-Glass Bottom Bar */}
           {isManager ? (
-            <div className="shrink-0 sticky bottom-0 bg-white/95 dark:bg-kalvium-dark-surface/95 backdrop-blur-md px-6 py-4 border-t border-kalvium-border dark:border-kalvium-dark-border z-30">
+            <div className="shrink-0 sticky bottom-0 bg-white/95 dark:bg-kalvium-dark-surface/95 backdrop-blur-md px-6 py-4 border-t border-kalvium-border dark:border-kalvium-dark-border z-30 space-y-2">
+              <button
+                type="button"
+                onClick={() => setAttendeesModalOpen(true)}
+                className="w-full py-3 px-5 rounded-full text-xs font-bold flex items-center justify-center gap-2 bg-kalvium-coral text-white hover:bg-kalvium-coral-hover transition shadow-soft-xs active:scale-[0.98]"
+              >
+                <Users className="w-4 h-4" />
+                <span>View Enrolled Students ({enrolledCount})</span>
+              </button>
               <Link
                 href="/dashboard/manager"
-                className="w-full py-3.5 px-5 rounded-full text-xs font-bold flex items-center justify-center gap-2 bg-kalvium-success-tint dark:bg-kalvium-dark-success-tint text-kalvium-success border border-kalvium-success/30 hover:bg-kalvium-success hover:text-white transition shadow-soft-xs active:scale-[0.98]"
+                className="w-full py-2.5 px-5 rounded-full text-xs font-semibold flex items-center justify-center gap-2 bg-kalvium-surface-alt dark:bg-kalvium-dark-surface-alt text-kalvium-text dark:text-kalvium-dark-text border border-kalvium-border dark:border-kalvium-dark-border hover:border-kalvium-coral transition active:scale-[0.98]"
               >
-                <ShieldCheck className="w-4 h-4" />
-                <span>Campus Manager Verification Center</span>
+                <ShieldCheck className="w-4 h-4 text-kalvium-success" />
+                <span>Manager Verification Queue</span>
               </Link>
+              {confirmDelete ? (
+                <div className="flex items-center gap-2 p-2 rounded-2xl bg-kalvium-coral/10 border border-kalvium-coral/30">
+                  <span className="text-xs font-semibold text-kalvium-coral flex-1">Delete permanently?</span>
+                  <button
+                    onClick={handleManagerDelete}
+                    disabled={deleting}
+                    className="px-3 py-1.5 rounded-full text-xs font-bold bg-kalvium-coral text-white hover:bg-kalvium-coral-hover transition shadow-sm"
+                  >
+                    {deleting ? "Deleting…" : "Yes, Delete"}
+                  </button>
+                  <button
+                    onClick={() => setConfirmDelete(false)}
+                    className="px-3 py-1.5 rounded-full text-xs font-bold bg-white dark:bg-kalvium-dark-surface text-kalvium-muted border border-kalvium-border transition"
+                  >
+                    Cancel
+                  </button>
+                </div>
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => setConfirmDelete(true)}
+                  className="w-full py-2 px-5 rounded-full text-xs font-medium flex items-center justify-center gap-2 text-kalvium-muted hover:text-kalvium-coral border border-kalvium-border dark:border-kalvium-dark-border hover:border-kalvium-coral/50 transition active:scale-[0.98]"
+                >
+                  <Trash2 className="w-3.5 h-3.5" />
+                  <span>Delete Event (Manager Action)</span>
+                </button>
+              )}
             </div>
           ) : isOrganizer ? (
-            <div className="shrink-0 sticky bottom-0 bg-white/95 dark:bg-kalvium-dark-surface/95 backdrop-blur-md px-6 py-4 border-t border-kalvium-border dark:border-kalvium-dark-border z-30">
+            <div className="shrink-0 sticky bottom-0 bg-white/95 dark:bg-kalvium-dark-surface/95 backdrop-blur-md px-6 py-4 border-t border-kalvium-border dark:border-kalvium-dark-border z-30 space-y-2">
+              <button
+                type="button"
+                onClick={() => setAttendeesModalOpen(true)}
+                className="w-full py-3 px-5 rounded-full text-xs font-bold flex items-center justify-center gap-2 bg-kalvium-coral text-white hover:bg-kalvium-coral-hover transition shadow-soft-xs active:scale-[0.98]"
+              >
+                <Users className="w-4 h-4" />
+                <span>View Enrolled Students ({enrolledCount})</span>
+              </button>
               <Link
                 href="/dashboard/organizer"
-                className="w-full py-3.5 px-5 rounded-full text-xs font-bold flex items-center justify-center gap-2 bg-kalvium-surface-alt dark:bg-kalvium-dark-surface-alt text-kalvium-text dark:text-kalvium-dark-text border border-kalvium-border dark:border-kalvium-dark-border hover:border-kalvium-coral hover:text-kalvium-coral transition shadow-soft-xs active:scale-[0.98]"
+                className="w-full py-2.5 px-5 rounded-full text-xs font-semibold flex items-center justify-center gap-2 bg-kalvium-surface-alt dark:bg-kalvium-dark-surface-alt text-kalvium-text dark:text-kalvium-dark-text border border-kalvium-border dark:border-kalvium-dark-border hover:border-kalvium-coral transition active:scale-[0.98]"
               >
                 <Sparkles className="w-4 h-4 text-kalvium-coral" />
-                <span>Organizer's Dashboard</span>
+                <span>Organizer Dashboard</span>
               </Link>
+              {(event as any).deletionRequested ? (
+                <div className="p-2.5 rounded-2xl bg-amber-500/10 border border-amber-500/20 text-center">
+                  <span className="text-xs font-bold text-amber-700 dark:text-amber-400 flex items-center justify-center gap-1.5">
+                    <AlertTriangle className="w-3.5 h-3.5" />
+                    <span>Deletion Request Pending Review</span>
+                  </span>
+                </div>
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => setRequestDeleteModalOpen(true)}
+                  className="w-full py-2 px-5 rounded-full text-xs font-medium flex items-center justify-center gap-1.5 text-kalvium-muted hover:text-kalvium-coral border border-kalvium-border dark:border-kalvium-dark-border hover:border-kalvium-coral/50 transition active:scale-[0.98]"
+                >
+                  <Trash2 className="w-3.5 h-3.5" />
+                  <span>Request Deletion from Manager</span>
+                </button>
+              )}
             </div>
           ) : (
-            <div className="shrink-0 sticky bottom-0 bg-white/95 dark:bg-kalvium-dark-surface/95 backdrop-blur-md px-6 py-4 border-t border-kalvium-border dark:border-kalvium-dark-border z-30">
+            <div className="shrink-0 sticky bottom-0 bg-white/95 dark:bg-kalvium-dark-surface/95 backdrop-blur-md px-6 py-4 border-t border-kalvium-border dark:border-kalvium-dark-border z-30 space-y-2">
+              {/* Primary: Apply / Enrolled */}
+              <button
+                onClick={handleApplyClick}
+                disabled={enrolling || isPast}
+                className={`w-full py-3.5 px-5 rounded-full text-sm font-bold flex items-center justify-center gap-2 transition-all duration-200 active:scale-[0.98] shadow-soft-xs disabled:opacity-60 disabled:cursor-not-allowed ${
+                  isEnrolled
+                    ? "bg-kalvium-success-tint dark:bg-kalvium-dark-success-tint text-kalvium-success border border-kalvium-success/40 hover:bg-kalvium-success hover:text-white"
+                    : isPast
+                    ? "bg-kalvium-surface-alt dark:bg-kalvium-dark-surface-alt text-kalvium-muted border border-kalvium-border"
+                    : "bg-kalvium-coral hover:bg-kalvium-coral-hover text-white shadow-md shadow-kalvium-coral/25"
+                }`}
+              >
+                {enrolling ? (
+                  <>
+                    <span className="w-4 h-4 rounded-full border-2 border-current border-t-transparent animate-spin shrink-0" />
+                    <span>Processing Application…</span>
+                  </>
+                ) : isPast ? (
+                  <span>Event Concluded</span>
+                ) : isEnrolled ? (
+                  <>
+                    <CheckCircle2 className="w-4 h-4" />
+                    <span>✓ Enrolled • Click to Withdraw Application</span>
+                  </>
+                ) : (
+                  <>
+                    <Users className="w-4 h-4" />
+                    <span>Apply / Enroll for this Event</span>
+                  </>
+                )}
+              </button>
+
+              {/* Secondary: Save to Schedule */}
               <button
                 onClick={handleSaveClick}
                 disabled={saving}
-                className={`w-full py-3.5 px-5 rounded-full text-sm font-semibold flex items-center justify-center gap-2 transition-all duration-200 active:scale-[0.98] shadow-xs disabled:opacity-60 disabled:cursor-not-allowed ${
+                className={`w-full py-2.5 px-5 rounded-full text-xs font-semibold flex items-center justify-center gap-2 transition-all duration-200 active:scale-[0.98] border ${
                   isSaved
-                    ? "bg-kalvium-surface-alt dark:bg-kalvium-dark-surface-alt text-kalvium-coral border border-kalvium-coral/30 hover:bg-kalvium-coral-tint"
-                    : "bg-kalvium-coral hover:bg-kalvium-coral-hover text-white shadow-md shadow-kalvium-coral/25"
+                    ? "bg-kalvium-surface-alt dark:bg-kalvium-dark-surface-alt text-kalvium-coral border-kalvium-coral/30 hover:bg-kalvium-coral-tint"
+                    : "bg-white dark:bg-kalvium-dark-surface text-kalvium-text dark:text-kalvium-dark-text border-kalvium-border dark:border-kalvium-dark-border hover:border-kalvium-coral"
                 }`}
               >
                 {saving ? (
                   <>
-                    <span className="w-4 h-4 rounded-full border-2 border-current border-t-transparent animate-spin shrink-0" />
+                    <span className="w-3.5 h-3.5 rounded-full border-2 border-current border-t-transparent animate-spin shrink-0" />
                     <span>Saving…</span>
                   </>
                 ) : isSaved ? (
                   <>
-                    <BookmarkCheck className="w-4 h-4 fill-kalvium-coral" />
-                    <span>Saved to My Schedule (Click to Remove)</span>
+                    <BookmarkCheck className="w-3.5 h-3.5 fill-kalvium-coral text-kalvium-coral" />
+                    <span>Saved to My Schedule</span>
                   </>
                 ) : (
                   <>
-                    <Bookmark className="w-4 h-4" />
+                    <Bookmark className="w-3.5 h-3.5" />
                     <span>Save to My Schedule</span>
                   </>
                 )}
@@ -413,6 +624,30 @@ export default function EventDetailDrawer({
           overlapStr={clashData.overlap?.formatted || "Direct Overlap"}
         />
       )}
+
+      {/* Attendee Roster Modal */}
+      <EventAttendeesModal
+        isOpen={attendeesModalOpen}
+        onClose={() => setAttendeesModalOpen(false)}
+        eventId={event.id}
+        eventTitle={event.title}
+        eventDate={event.date}
+        eventVenue={event.venue}
+      />
+
+      {/* Organizer Request Deletion Modal */}
+      <RequestDeleteModal
+        isOpen={requestDeleteModalOpen}
+        onClose={() => setRequestDeleteModalOpen(false)}
+        eventId={event.id}
+        eventTitle={event.title}
+        eventDate={event.date}
+        eventVenue={event.venue}
+        onSuccess={() => {
+          onClose();
+          router.refresh();
+        }}
+      />
     </>
   );
 }
