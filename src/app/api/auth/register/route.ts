@@ -4,6 +4,7 @@ import { setAuthCookie } from "@/lib/auth";
 import { checkRateLimit, rateLimitResponse } from "@/lib/rate-limit";
 import { sanitizePlainText } from "@/lib/sanitize";
 import { logSecurityEvent } from "@/lib/audit-logger";
+import { isEnrolledStudentInDb, getEnrolledStudentFromDb } from "@/lib/student-roster";
 
 export async function POST(req: NextRequest) {
   try {
@@ -58,6 +59,16 @@ export async function POST(req: NextRequest) {
       return NextResponse.json(
         { error: "Only @kalvium.community and @kalvium.com email addresses are allowed for registration." },
         { status: 400 }
+      );
+    }
+
+    const isEnrolled = await isEnrolledStudentInDb(cleanEmail);
+    if (!isEnrolled) {
+      return NextResponse.json(
+        { 
+          error: "Access Denied: Your email is not found on the enrolled student roster. Only registered students are permitted to access CampusHub." 
+        },
+        { status: 403 }
       );
     }
 

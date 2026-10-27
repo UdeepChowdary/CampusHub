@@ -50,5 +50,11 @@ test-*.mjs
 test-*.ts
 scripts/setup-*.mjs
 scripts/verify-*.mjs
+scripts/seed-roster.mjs
 *.db
 prisma/
+
+# student roster & excel datasets
+*.xlsx
+*.xls
+/data/

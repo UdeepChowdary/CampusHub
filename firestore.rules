@@ -85,5 +85,10 @@ service cloud.firestore {
         allow write: if isAuthenticated() && request.auth.uid == userId;
       }
     }
+
+    // Private student enrollment registry (Admin server only, zero client access)
+    match /allowed_students/{docId} {
+      allow read, write: if false;
+    }
   }
 }

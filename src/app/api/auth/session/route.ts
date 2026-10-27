@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { adminAuth, adminDb } from "@/lib/firebase/admin";
 import { setAuthCookie } from "@/lib/auth";
 import { checkRateLimit, rateLimitResponse } from "@/lib/rate-limit";
+import { isEnrolledStudentInDb, isStaffEmail, getEnrolledStudentFromDb } from "@/lib/student-roster";
 
 export const dynamic = "force-dynamic";
 
@@ -48,8 +49,23 @@ export async function POST(req: NextRequest) {
       );
     }
 
+    // Student Roster Enforcement: Verify student email is on official enrollment registry
+    const isStaff = user?.role === "CAMPUS_MANAGER" || isStaffEmail(cleanEmail);
+    if (!isStaff) {
+      const isEnrolled = await isEnrolledStudentInDb(cleanEmail);
+      if (!isEnrolled) {
+        return NextResponse.json(
+          { 
+            error: `Access Denied: ${cleanEmail} is not on the enrolled student roster. Only authorized campus students may sign in.` 
+          },
+          { status: 403 }
+        );
+      }
+    }
+
     if (!userDoc.exists) {
-      const name = decoded.name || (email ? email.split("@")[0] : "Campus Member");
+      const rosterEntry = await getEnrolledStudentFromDb(cleanEmail);
+      const name = rosterEntry?.name || decoded.name || (email ? email.split("@")[0] : "Campus Member");
       const role = (decoded.role as "STUDENT" | "ORGANIZER" | "CAMPUS_MANAGER") || "STUDENT";
 
       const fallbackUser = {

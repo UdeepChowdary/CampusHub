@@ -110,7 +110,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         }
         return data.user;
       } else {
-        // Fallback to /api/auth/me
+        const errJson = await res.json().catch(() => ({}));
+        if (res.status === 403) {
+          if (typeof document !== "undefined") {
+            document.cookie = "campus_auth_token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT; SameSite=Lax";
+            document.cookie = "campus_user_role=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT; SameSite=Lax";
+            document.cookie = "campus_user_role_sig=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT; SameSite=Lax";
+          }
+          await signOut(auth);
+          setUser(null);
+          return { error: errJson.error || "Access Denied: You are not on the enrolled student roster." } as any;
+        }
+
+        // Fallback to /api/auth/me for other transient issues
         try {
           const meRes = await fetch("/api/auth/me", { cache: "no-store" });
           if (isLoggingOutRef.current) return null;
@@ -176,6 +188,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
 
       const fetchedUser = await fetchCurrentUser(userCredential.user);
+      if (fetchedUser && "error" in fetchedUser) {
+        return { success: false, error: (fetchedUser as any).error };
+      }
+
       const effectiveRole = role || fetchedUser?.role || "STUDENT";
       if (typeof document !== "undefined") {
         document.cookie = `campus_user_role=${effectiveRole}; path=/; max-age=604800; SameSite=Lax`;
@@ -209,6 +225,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
 
       const fetchedUser = await fetchCurrentUser(firebaseUser);
+      if (fetchedUser && "error" in fetchedUser) {
+        return { success: false, error: (fetchedUser as any).error };
+      }
+
       const effectiveRole = role || fetchedUser?.role || "STUDENT";
       if (typeof document !== "undefined") {
         document.cookie = `campus_user_role=${effectiveRole}; path=/; max-age=604800; SameSite=Lax`;
@@ -279,6 +299,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const data = await res.json();
       if (!res.ok) {
         isRegisteringRef.current = false;
+        try {
+          await firebaseUser.delete();
+        } catch {
+          // ignore
+        }
         await signOut(auth);
         return { success: false, error: data.error || "Registration failed" };
       }
